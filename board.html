@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学級掲示板 OS v3.5</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+JP:wght@300;500;700;900&display=swap');
+        :root { --bg: #080808; --card: #121212; --border: #1f1f1f; }
+        body { font-family: 'Noto Sans JP', sans-serif; background-color: var(--bg); color: #fff; }
+        .matte-input { background: var(--card); border: 1px solid var(--border); color: #fff; outline: none; transition: 0.2s; }
+        .matte-input:focus { border-color: #555; background: #181818; }
+        
+        #board-canvas { 
+            width: 1080px; 
+            min-height: 1080px; 
+            height: auto; 
+            background: #fff; 
+            color: #000; 
+            padding: 75px 85px 120px 85px; 
+            display: flex; 
+            flex-direction: column; 
+            position: relative; 
+        }
+        
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .fade-in { animation: fadeIn 0.5s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="p-6 lg:p-12">
+
+    <div class="max-w-[1450px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10">
+        
+        <div class="lg:col-span-5 space-y-6 overflow-y-auto max-h-screen pr-4 pb-20 hide-scrollbar">
+            <header class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold italic tracking-tighter uppercase">Board OS <span class="text-blue-500">v3.5</span></h1>
+                <button onclick="fetchAllWeatherData()" class="text-[10px] font-bold bg-blue-600 px-5 py-2.5 rounded-full hover:bg-blue-500 transition-all flex items-center gap-2">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> 気象情報更新
+                </button>
+            </header>
+
+            <div class="bg-[#121212] p-6 rounded-3xl border border-[#1f1f1f] space-y-4 shadow-xl">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1 block">天気</label>
+                        <select id="in-weather" class="matte-input w-full p-3 rounded-2xl font-bold" oninput="render()">
+                            <option value="sun">☀️ 晴れ</option>
+                            <option value="cloud">☁️ 曇り</option>
+                            <option value="cloud-rain">☔ 雨</option>
+                            <option value="snowflake">❄️ 雪</option>
+                            <option value="cloud-lightning">⚡ 雷雨</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1 block">気温</label>
+                        <input type="text" id="in-temp" class="matte-input w-full p-3 rounded-2xl font-bold text-center" placeholder="--℃" oninput="render()">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1 block">授業数</label>
+                        <input type="number" id="in-total-periods" class="matte-input w-full p-3 rounded-2xl font-bold text-center" value="6" min="1" max="8" oninput="updateTimetableInputs()">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1 block">スタイル</label>
+                        <select id="in-period-min" class="matte-input w-full p-3 rounded-2xl font-bold" oninput="render()">
+                            <option value="50">50分授業</option>
+                            <option value="45">45分授業</option>
+                            <option value="B日程">B日程</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-[#121212] p-6 rounded-3xl border border-[#1f1f1f] space-y-4">
+                <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2 italic">
+                    <i data-lucide="grid" class="w-3.5 h-3.5"></i> 時間割入力
+                </h3>
+                <div id="timetable-inputs-container" class="grid grid-cols-2 gap-3"></div>
+            </div>
+
+            <div id="dynamic-sections" class="space-y-4"></div>
+
+            <button onclick="addSection()" class="w-full py-4 border-2 border-dashed border-[#222] rounded-2xl text-slate-500 font-bold hover:border-slate-400 hover:text-slate-300 transition-all flex items-center justify-center gap-2">
+                <i data-lucide="plus" class="w-5 h-5"></i> 項目を追加
+            </button>
+
+            <button onclick="exportImage()" class="w-full py-6 bg-white text-black font-bold rounded-3xl shadow-2xl transition-all text-sm tracking-[0.2em] uppercase">
+                画像を保存する
+            </button>
+        </div>
+
+        <div class="lg:col-span-7 flex flex-col items-center">
+            <div style="transform: scale(0.42); transform-origin: top center;">
+                <div id="board-canvas" class="fade-in">
+                    <header class="flex justify-between items-start border-b-[16px] border-black pb-10">
+                        <div>
+                            <div class="text-[15px] font-bold tracking-[0.5em] text-slate-300 mb-2 uppercase italic">Daily Briefing / Murata-Cho</div>
+                            <h2 class="text-7xl font-bold tracking-[0.02em] text-slate-900 leading-none">事務連絡</h2>
+                        </div>
+                        <div class="text-right">
+                            <p id="out-date" class="text-5xl font-bold tracking-tighter mb-2 italic">--/-- (--)</p>
+                            <div class="flex flex-col items-end gap-1">
+                                <div id="out-weather-icon" class="bg-white p-1 mb-1 rounded-sm shadow-sm"></div>
+                                <p id="out-temp" class="text-2xl font-medium text-slate-400 italic">--℃</p>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div class="mt-10 flex gap-4 h-[88px]">
+                        <div class="bg-slate-50 px-8 py-5 rounded-3xl flex items-center gap-4">
+                            <i data-lucide="clock" class="w-7 h-7 text-slate-900"></i>
+                            <p class="text-2xl font-bold text-slate-900"><span id="out-total-periods">6</span>時間 <span class="mx-3 opacity-20">|</span> <span id="out-period-min">50</span></p>
+                        </div>
+                        <div id="out-warn-area" class="flex-1 bg-black text-white px-8 py-5 rounded-3xl hidden items-center overflow-hidden">
+                            <marquee id="out-warn-list" scrollamount="10" class="text-2xl font-bold italic uppercase"></marquee>
+                        </div>
+                    </div>
+
+                    <div class="mt-12 mb-4 flex items-baseline gap-4">
+                        <h3 class="text-2xl font-bold tracking-tight text-slate-900">次回の時間割</h3>
+                        <span class="text-xs font-bold uppercase tracking-[0.3em] text-slate-300 italic">TimeSchedule</span>
+                    </div>
+
+                    <div class="grid grid-cols-6 gap-5" id="out-timetable"></div>
+
+                    <div id="out-sections-grid" class="grid grid-cols-2 gap-x-16 gap-y-14 mt-14 flex-1 items-start"></div>
+
+                    <footer class="mt-20 border-t border-slate-100 pt-10 flex justify-between items-baseline italic">
+                        <div class="text-[12px] font-bold tracking-[0.5em] text-slate-200 uppercase">Board Design OS 3.5 PRO</div>
+                        <div id="out-time" class="text-6xl font-bold tracking-tighter font-mono">00:00</div>
+                    </footer>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- (今までの全機能を完全維持) ---
+        const subjectPresets = {
+            'pencil': '宿題・自学', 'megaphone': '事務連絡', 'book': '国語', 'calculator': '数学',
+            'microscope': '理科', 'languages': '英語', 'map': '社会', 'music': '音楽',
+            'palette': '美術', 'dumbbell': '保健体育', 'alert-circle': '【重要】', 'shopping-bag': '持ち物'
+        };
+
+        const iconLabels = {
+            'pencil': '鉛筆', 'megaphone': '連絡', 'book': '国語', 'calculator': '数学',
+            'microscope': '理科', 'languages': '英語', 'map': '社会', 'music': '音楽',
+            'palette': '美術', 'dumbbell': '体育', 'alert-circle': '重要', 'shopping-bag': '持物'
+        };
+
+        let periods = Array(8).fill('');
+        let sections = [
+            { id: 1, title: '宿題・自学', icon: 'pencil', content: '' },
+            { id: 2, title: '事務連絡', icon: 'megaphone', content: '' }
+        ];
+
+        async function fetchAllWeatherData() {
+            try {
+                const weatherRes = await fetch('https://www.jma.go.jp/bosai/forecast/data/forecast/040000.json');
+                const weatherData = await weatherRes.json();
+                const report = weatherData[0].timeSeries[0].areas[0];
+                const weatherText = report.weathers[0];
+                let icon = 'sun';
+                if(weatherText.includes('雷')) icon = 'cloud-lightning';
+                else if(weatherText.includes('雨')) icon = 'cloud-rain';
+                else if(weatherText.includes('雪')) icon = 'snowflake';
+                else if(weatherText.includes('曇')) icon = 'cloud';
+                document.getElementById('in-weather').value = icon;
+                document.getElementById('in-temp').value = `${weatherData[0].timeSeries[2].areas[0].temps[1]}℃`;
+                render();
+            } catch (e) { console.error(e); }
+        }
+
+        function updateTimetableInputs() {
+            const count = parseInt(document.getElementById('in-total-periods').value) || 6;
+            const container = document.getElementById('timetable-inputs-container');
+            container.innerHTML = '';
+            for(let i=0; i<count; i++) {
+                container.innerHTML += `<div class="flex items-center gap-2"><span class="text-[10px] font-bold text-slate-600 w-4">${i+1}</span><input type="text" class="matte-input flex-1 p-3 rounded-xl font-bold text-sm" value="${periods[i] || ''}" oninput="periods[${i}]=this.value; render();"></div>`;
+            }
+            render();
+        }
+
+        function addSection() {
+            sections.push({ id: Date.now(), title: '新しい項目', icon: 'megaphone', content: '' });
+            updateSectionInputs();
+        }
+
+        function removeSection(id) {
+            if(confirm('削除しますか？')) {
+                sections = sections.filter(s => s.id !== id);
+                updateSectionInputs();
+            }
+        }
+
+        function updateSectionInputs() {
+            const container = document.getElementById('dynamic-sections');
+            container.innerHTML = sections.map(s => `
+                <div class="bg-[#151515] p-5 rounded-3xl border border-[#1f1f1f] space-y-3 relative group">
+                    <button onclick="removeSection(${s.id})" class="absolute top-4 right-4 text-slate-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    <div class="flex gap-2">
+                        <select class="matte-input p-2 rounded-xl text-xs font-bold w-24" onchange="handleIconChange(${s.id}, this.value)">
+                            ${Object.keys(subjectPresets).map(k => `<option value="${k}" ${s.icon===k?'selected':''}>${iconLabels[k]}</option>`).join('')}
+                        </select>
+                        <input type="text" class="matte-input flex-1 p-2 rounded-xl font-bold text-xs" value="${s.title}" oninput="updateSectionData(${s.id}, 'title', this.value)">
+                    </div>
+                    <textarea class="matte-input w-full p-4 rounded-2xl text-xs" rows="2" oninput="updateSectionData(${s.id}, 'content', this.value)">${s.content}</textarea>
+                </div>
+            `).join('');
+            lucide.createIcons();
+            render();
+        }
+
+        function handleIconChange(id, newIcon) {
+            const section = sections.find(s => s.id === id);
+            section.icon = newIcon;
+            section.title = subjectPresets[newIcon];
+            updateSectionInputs();
+        }
+
+        function updateSectionData(id, key, val) {
+            const s = sections.find(x => x.id === id);
+            if(s) s[key] = val;
+            render();
+        }
+
+        function render() {
+            const getV = (id) => document.getElementById(id).value;
+            document.getElementById('out-temp').innerText = getV('in-temp');
+            document.getElementById('out-weather-icon').innerHTML = `<i data-lucide="${getV('in-weather')}" class="w-10 h-10 text-black"></i>`;
+            document.getElementById('out-total-periods').innerText = getV('in-total-periods');
+            const minV = getV('in-period-min');
+            document.getElementById('out-period-min').innerText = isNaN(minV) ? `${minV}` : `${minV}分授業`;
+            
+            const count = parseInt(getV('in-total-periods'));
+            document.getElementById('out-timetable').innerHTML = Array.from({length:count}).map((_, i) => `
+                <div class="border-[3px] border-slate-900 rounded-3xl p-5 text-center">
+                    <p class="text-[11px] font-bold text-slate-300 mb-1 uppercase tracking-widest">${i+1}</p>
+                    <p class="text-4xl font-bold leading-none tracking-tighter">${periods[i] || '-'}</p>
+                </div>`).join('');
+
+            document.getElementById('out-sections-grid').innerHTML = sections.map(s => `
+                <section>
+                    <h3 class="text-[14px] font-bold uppercase tracking-[0.4em] mb-8 text-slate-400 flex items-center gap-4 italic">
+                        <span class="p-2.5 bg-white rounded-xl shadow-sm"><i data-lucide="${s.icon}" class="w-5 h-5 text-black"></i></span> ${s.title}
+                    </h3>
+                    <ul class="space-y-6">
+                        ${s.content.split('\n').filter(t => t.trim()).map(l => `
+                            <li class="text-[32px] font-bold tracking-tight leading-[1.2] flex items-start">
+                                <span class="mr-4 text-slate-200">・</span>${l}
+                            </li>`).join('') || '<li class="text-xl italic text-slate-200 font-medium">未入力</li>'}
+                    </ul>
+                </section>`).join('');
+
+            document.getElementById('out-time').innerText = new Date().toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit'});
+            lucide.createIcons();
+        }
+
+        const d = new Date();
+        document.getElementById('out-date').innerText = `${d.getMonth()+1}/${d.getDate()} (${['日','月','火','水','木','金','土'][d.getDay()]})`;
+        updateTimetableInputs();
+        updateSectionInputs();
+
+        async function exportImage() {
+            const node = document.getElementById('board-canvas');
+            const dataUrl = await htmlToImage.toPng(node, { 
+                pixelRatio: 3,
+                style: { height: node.scrollHeight + 'px' } 
+            });
+            const link = document.createElement('a');
+            link.download = `掲示板_${d.getMonth()+1}${d.getDate()}.png`;
+            link.href = dataUrl;
+            link.click();
+        }
+    </script>
+</body>
+</html>
