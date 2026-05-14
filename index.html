@@ -244,8 +244,8 @@
 
         let periods = Array(8).fill('');
         let sections = [
-            { id: 1, title: '宿題・自学', icon: 'pencil', content: '' },
-            { id: 2, title: '事務連絡', icon: 'megaphone', content: '' }
+            { id: 1, title: '宿題・自学', icon: 'pencil', content: '', width: 'half' },
+            { id: 2, title: '事務連絡', icon: 'megaphone', content: '', width: 'half' }
         ];
 
         function aiToneCheck() {
@@ -315,7 +315,7 @@
         }
 
         function addSection() {
-            sections.push({ id: Date.now(), title: '新しい項目', icon: 'megaphone', content: '' });
+            sections.push({ id: Date.now(), title: '新しい項目', icon: 'megaphone', content: '', width: 'half' });
             updateSectionInputs();
         }
 
@@ -336,6 +336,10 @@
                             ${Object.keys(subjectPresets).map(k => `<option value="${k}" ${s.icon===k?'selected':''}>${iconLabels[k]}</option>`).join('')}
                         </select>
                         <input type="text" class="matte-input flex-1 p-2 rounded-xl font-bold text-xs" value="${s.title}" oninput="updateSectionData(${s.id}, 'title', this.value)">
+                        <select class="matte-input p-2 rounded-xl text-xs font-bold w-24" onchange="updateSectionData(${s.id}, 'width', this.value)">
+                            <option value="half" ${s.width === 'half' || !s.width ? 'selected' : ''}>横半分</option>
+                            <option value="full" ${s.width === 'full' ? 'selected' : ''}>横全体</option>
+                        </select>
                     </div>
                     <textarea class="matte-input w-full p-4 rounded-2xl text-xs" rows="2" oninput="updateSectionData(${s.id}, 'content', this.value)">${s.content}</textarea>
                 </div>
@@ -395,16 +399,23 @@
                 </div>`).join('');
 
             document.getElementById('out-sections-grid').innerHTML = sections.map(s => `
-                <section>
+                <section class="${s.width === 'full' ? 'col-span-2' : ''}">
                     <h3 class="text-[14px] font-light uppercase tracking-[0.4em] mb-8 text-slate-400 flex items-center gap-4 italic">
                         <span class="p-2.5 bg-white rounded-xl shadow-sm border border-slate-100"><i data-lucide="${s.icon}" class="w-5 h-5 text-black"></i></span> ${s.title}
                     </h3>
-                    <ul class="space-y-6">
-                        ${s.content.split('\n').filter(t => t.trim()).map(l => `
-                            <li class="text-[32px] font-bold tracking-tight leading-[1.2] flex items-start">
-                                <span class="mr-4 text-slate-200">・</span><span>${formatText(l)}</span>
-                            </li>`).join('') || '<li class="text-xl italic text-slate-200 font-medium">未入力</li>'}
-                    </ul>
+                    <div class="space-y-6">
+                        ${s.content.split('\n').filter(t => t.trim()).map(l => {
+                            if (l.startsWith('・')) {
+                                return `<div class="text-[32px] font-bold tracking-tight leading-[1.2] flex items-start">
+                                    <span class="mr-4 text-slate-200">・</span><span>${formatText(l.substring(1))}</span>
+                                </div>`;
+                            } else {
+                                return `<div class="text-[32px] font-bold tracking-tight leading-[1.2]">
+                                    ${formatText(l)}
+                                </div>`;
+                            }
+                        }).join('') || '<div class="text-xl italic text-slate-200 font-medium">未入力</div>'}
+                    </div>
                 </section>`).join('');
 
             document.getElementById('out-time').innerText = new Date().toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit'});
