@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学級掲示板 OS v5.0 UD PRO</title>
+    <title>学級掲示板 OS v5.4 UD PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -13,7 +13,6 @@
         
         :root { --bg: #080808; --card: #121212; --border: #1f1f1f; }
         
-        /* フォントの使い分け定義 */
         .font-biz { font-family: 'BIZ UDPGothic', sans-serif; }
         .font-inter { font-family: 'Inter', sans-serif; }
         
@@ -27,7 +26,7 @@
         .matte-input { background: var(--card); border: 1px solid var(--border); color: #fff; outline: none; transition: 0.2s; font-family: 'BIZ UDPGothic', sans-serif; }
         .matte-input:focus { border-color: #555; background: #181818; }
         
-        /* 出力キャンバス（1080px 正方形ベース） */
+        /* 1080px 出力キャンバス */
         #board-canvas { 
             width: 1080px; 
             min-height: 1080px; 
@@ -40,7 +39,6 @@
             position: relative; 
         }
 
-        /* ダークテーマ時の洗練された配色リファイン */
         #board-canvas.theme-dark { background: #000000; color: #ffffff; }
         #board-canvas.theme-dark .text-slate-900 { color: #ffffff; }
         #board-canvas.theme-dark .text-slate-400 { color: #888888; }
@@ -51,7 +49,6 @@
         #board-canvas.theme-dark .bg-white { background: #161616; border-color: #262626; }
         #board-canvas.theme-dark i { color: #ffffff !important; }
         #board-canvas.theme-dark .subject-label { color: #ffffff !important; background: #222 !important; }
-        #board-canvas.theme-dark .topics-card { background: #110505; }
 
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         
@@ -84,42 +81,12 @@
             background: repeating-linear-gradient(-45deg, #dc2626, #dc2626 20px, #b91c1c 20px, #b91c1c 40px);
         }
 
-        /* 📕 本のデザイン（Book Style） */
+        /* 📕 本のデザイン（Book Style）基盤 */
         .book-container {
             position: relative;
-            background: #ffffff;
-            box-shadow: 2px 4px 12px rgba(0,0,0,0.06), inset -1px 0 2px rgba(0,0,0,0.02);
+            box-shadow: 2px 4px 12px rgba(0,0,0,0.05), inset -1px 0 2px rgba(0,0,0,0.02);
             border-radius: 4px 12px 12px 4px;
-            transition: all 0.3s;
-        }
-        #board-canvas.theme-dark .book-container {
-            background: #121212;
-            box-shadow: 4px 6px 20px rgba(0,0,0,0.5), inset -1px 0 2px rgba(255,255,255,0.02);
-            border: 1px solid #222;
-            border-left: none;
-        }
-
-        /* しおりリボン */
-        .bookmark-ribbon {
-            position: absolute;
-            top: 0;
-            right: 20px;
-            width: 14px;
-            height: 32px;
-            background: #dc2626;
-            box-shadow: 1px 2px 4px rgba(0,0,0,0.15);
-        }
-        .bookmark-ribbon::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            border-left: 7px solid transparent;
-            border-right: 7px solid transparent;
-            border-bottom: 7px solid #ffffff;
-        }
-        #board-canvas.theme-dark .bookmark-ribbon::after {
-            border-bottom-color: #121212;
+            transition: all 0.2s ease;
         }
 
         .calendar-cell.active {
@@ -132,10 +99,10 @@
 
     <div class="max-w-[1450px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10">
         
-        <!-- 左パネル: コントロール＆設定 -->
+        <!-- 左パネル: 各種設定・操作 -->
         <div class="lg:col-span-5 space-y-6 overflow-y-auto max-h-screen pr-4 pb-20 hide-scrollbar">
             <header class="flex justify-between items-center border-b border-[#1f1f1f] pb-4">
-                <h1 class="text-2xl font-black font-inter tracking-tighter uppercase italic">Board OS <span class="text-blue-500">v5.3 UD</span></h1>
+                <h1 class="text-2xl font-black font-inter tracking-tighter uppercase italic">Board OS <span class="text-blue-500">v5.4 UD</span></h1>
                 <button onclick="fetchAllWeatherData()" class="text-[10px] font-bold bg-blue-600 px-4 py-2 rounded-full hover:bg-blue-500 transition-all flex items-center gap-2">
                     <i data-lucide="cloud-rain" class="w-3.5 h-3.5"></i> 気象取得
                 </button>
@@ -226,27 +193,47 @@
                             <option value="その他" selected>その他</option>
                         </select>
                         <label class="flex items-center gap-1.5 text-[11px] text-slate-400 cursor-pointer">
-                            <input type="checkbox" id="cal-important" class="accent-red-500"> 🔖 重要(赤しおり)
+                            <input type="checkbox" id="cal-important" class="accent-red-500"> 🔴 重要（赤縁取り）
                         </label>
                     </div>
-                    <input type="text" id="cal-title" class="matte-input w-full p-2.5 rounded-xl text-xs font-bold" placeholder="タイトル（例: 漢字テスト）">
-                    <textarea id="cal-desc" class="matte-input w-full p-2.5 rounded-xl text-xs" rows="2" placeholder="詳細内容や範囲"></textarea>
+                    <input type="text" id="cal-title" class="matte-input w-full p-2.5 rounded-xl text-xs font-bold" placeholder="タイトル（例: 単元テスト）">
+                    <textarea id="cal-desc" class="matte-input w-full p-2.5 rounded-xl text-xs" rows="2" placeholder="詳細内容やテスト範囲など"></textarea>
                     <button onclick="saveCalendarEvent()" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl transition-colors">カレンダーに保存</button>
                 </div>
             </div>
 
-            <!-- 勉強トピックス設定 -->
+            <!-- 💡 【機能拡張】勉強トピックス設定（複数プリセット＆カラーセレクト） -->
             <div class="bg-[#121212] p-6 rounded-3xl border border-red-900/30 space-y-4">
                 <h3 class="text-[10px] font-bold text-red-400 uppercase tracking-[0.2em] flex items-center gap-2 italic">
-                    <i data-lucide="lightbulb" class="w-3.5 h-3.5"></i> 勉強トピックス設定（赤縁カード）
+                    <i data-lucide="lightbulb" class="w-3.5 h-3.5"></i> 勉強トピックス（最下部カード設定）
                 </h3>
-                <div class="flex gap-1.5 flex-wrap">
-                    <button onclick="applyTopicsPreset('pomodoro')" class="text-[10px] bg-zinc-800 px-2.5 py-1 rounded-lg hover:bg-zinc-700 font-bold">⏱️ ポモドーロ</button>
-                    <button onclick="applyTopicsPreset('ebbinghaus')" class="text-[10px] bg-zinc-800 px-2.5 py-1 rounded-lg hover:bg-zinc-700 font-bold">📈 復習法</button>
-                    <button onclick="applyTopicsPreset('clear')" class="text-[10px] bg-red-950 text-red-300 px-2.5 py-1 rounded-lg">クリア</button>
+                
+                <!-- 豊富なプリセットボタン -->
+                <div>
+                    <label class="text-[9px] font-bold text-slate-500 uppercase block mb-1">トピックス プリセット</label>
+                    <div class="flex gap-1.5 flex-wrap">
+                        <button onclick="applyTopicsPreset('pomodoro')" class="text-[10px] bg-zinc-800 px-2 py-1 rounded-lg hover:bg-zinc-700 font-bold">⏱️ ポモドーロ</button>
+                        <button onclick="applyTopicsPreset('ebbinghaus')" class="text-[10px] bg-zinc-800 px-2 py-1 rounded-lg hover:bg-zinc-700 font-bold">📈 復習法</button>
+                        <button onclick="applyTopicsPreset('exam_plan')" class="text-[10px] bg-zinc-800 px-2 py-1 rounded-lg hover:bg-zinc-700 font-bold">📝 テスト計画</button>
+                        <button onclick="applyTopicsPreset('memory_tip')" class="text-[10px] bg-zinc-800 px-2 py-1 rounded-lg hover:bg-zinc-700 font-bold">🧠 暗記のコツ</button>
+                        <button onclick="applyTopicsPreset('clear')" class="text-[10px] bg-red-950 text-red-300 px-2 py-1 rounded-lg">クリア</button>
+                    </div>
                 </div>
-                <input type="text" id="in-topics-title" class="matte-input w-full p-3 rounded-xl font-bold text-sm" placeholder="トピックスのタイトル" oninput="render()">
-                <textarea id="in-topics-content" class="matte-input w-full p-3 rounded-xl text-xs" rows="3" placeholder="勉強テクニックやおすすめのアドバイスを入力" oninput="render()"></textarea>
+
+                <!-- 動的カラー変更セレクト -->
+                <div>
+                    <label class="text-[9px] font-bold text-slate-500 uppercase block mb-1">カードの縁取りカラー選択</label>
+                    <select id="in-topics-color" class="matte-input w-full p-2.5 rounded-xl font-bold text-xs" oninput="render()">
+                        <option value="red">🔴 パッションレッド（重要・警告）</option>
+                        <option value="blue">🔵 インテリジェンスブルー（数学・ロジック）</option>
+                        <option value="emerald">🟢 リラックスエメラルド（集中・科学）</option>
+                        <option value="orange">🟠 アクティブオレンジ（英語・暗記）</option>
+                        <option value="purple">🟣 クリエイティブパープル（芸術・発想）</option>
+                    </select>
+                </div>
+
+                <input type="text" id="in-topics-title" class="matte-input w-full p-3 rounded-xl font-bold text-sm" placeholder="トピックスタイトル" oninput="render()">
+                <textarea id="in-topics-content" class="matte-input w-full p-3 rounded-xl text-xs" rows="3" placeholder="勉強法や有益なアドバイスを入力" oninput="render()"></textarea>
             </div>
 
             <!-- カウントダウン -->
@@ -288,12 +275,6 @@
                         <input type="text" id="in-typhoon-title" class="matte-input flex-1 p-3 rounded-xl font-bold text-sm" value="台風情報">
                         <button onclick="fetchTyphoonData()" class="px-3 bg-red-900/40 text-red-400 rounded-xl text-[10px] font-bold hover:bg-red-900/60 transition-colors">JSON取得</button>
                     </div>
-                    <select id="in-typhoon-level" class="matte-input w-full p-3 rounded-xl font-bold text-sm text-red-300" oninput="render()">
-                        <option value="警戒レベル不要">レベル非表示</option>
-                        <option value="警戒レベル3（高齢者等避難）">警戒レベル3（高齢者等避難）</option>
-                        <option value="警戒レベル4（全員避難）">警戒レベル4（全員避難）</option>
-                        <option value="警戒レベル5（緊急安全確保）">警戒レベル5（緊急安全確保）</option>
-                    </select>
                     <textarea id="in-typhoon-desc" class="matte-input w-full p-3 rounded-xl font-bold text-xs" rows="2" oninput="render()">部活動は中止です。</textarea>
                 </div>
             </div>
@@ -330,7 +311,7 @@
             </div>
         </div>
 
-        <!-- 右パネル: 1080px 正方形高解像度出力キャンバス -->
+        <!-- 右パネル: 1080px 出力グラフィックキャンバス -->
         <div class="lg:col-span-7 flex flex-col items-center">
             <div style="transform: scale(0.44); transform-origin: top center;">
                 <div id="board-canvas" class="shadow-[0_50px_100px_rgba(0,0,0,0.35)]">
@@ -339,7 +320,7 @@
                     <header class="flex justify-between items-start border-b-[16px] border-black pb-10 relative">
                         <div>
                             <div class="text-[14px] font-black tracking-[0.5em] text-slate-300 mb-2 uppercase italic font-inter">Daily Briefing / Murata-Cho</div>
-                            <h2 class="text-7xl font-light tracking-[0.02em] text-slate-900 leading-none">事務連絡</h2>
+                            <h2 class="text-7xl font-light tracking-[0.02em] text-slate-900 leading-none font-biz">事務連絡</h2>
                         </div>
                         
                         <!-- カウントダウン -->
@@ -366,7 +347,6 @@
                                 </div>
                                 <div>
                                     <h3 id="out-typhoon-title" class="text-4xl font-black text-red-700 tracking-tight">台風情報</h3>
-                                    <p id="out-typhoon-level" class="text-lg font-bold text-red-500 tracking-widest mt-1">警戒レベル</p>
                                 </div>
                             </div>
                             <p id="out-typhoon-desc" class="text-2xl font-bold text-slate-800 leading-relaxed whitespace-pre-wrap">--</p>
@@ -386,37 +366,37 @@
 
                     <!-- 時間割 -->
                     <div class="mt-12 mb-4 flex items-baseline gap-4">
-                        <h3 class="text-2xl font-bold tracking-tight text-slate-900">次回の時間割</h3>
+                        <h3 class="text-2xl font-bold tracking-tight text-slate-900 font-biz">次回の時間割</h3>
                         <span class="text-xs font-black uppercase tracking-[0.3em] text-slate-300 italic font-inter">Time Schedule</span>
                     </div>
                     <div class="grid grid-cols-6 gap-5" id="out-timetable"></div>
 
                     <!-- 📕 本のデザイン：今後の予定ライン -->
                     <div class="mt-12 mb-4 flex items-baseline gap-4">
-                        <h3 class="text-2xl font-bold tracking-tight text-slate-900">今後の予定ライン</h3>
+                        <h3 class="text-2xl font-bold tracking-tight text-slate-900 font-biz">今後の予定ライン</h3>
                         <span class="text-xs font-black uppercase tracking-[0.3em] text-slate-300 italic font-inter">Book Rack Timeline</span>
                     </div>
                     <div id="out-timeline-bar" class="flex gap-6 overflow-x-auto py-3 px-2 tracking-tight hide-scrollbar">
-                        <!-- スクリプトによって背表紙デザインが自動生成 -->
+                        <!-- 動的に背表紙カードが整列 -->
                     </div>
 
-                    <!-- メイン通常ボックス + 明日の自動連携 -->
+                    <!-- メイン掲示エリア（いつものデザイン） -->
                     <div id="out-sections-grid" class="grid grid-cols-2 gap-x-16 gap-y-12 mt-10 flex-1 items-start content-start"></div>
 
-                    <!-- 🔴 【新機能】 勉強トピックス（最下部固定・太赤縁洗練カード） -->
+                    <!-- 🔴 【アップデート】洗練された勉強トピックスカード（最下部固定・可変カラー太縁） -->
                     <div id="out-topics-area" class="mt-12 hidden">
-                        <div class="topics-card w-full border-4 border-red-600 rounded-3xl p-7 bg-red-50/20 flex flex-col relative overflow-hidden">
+                        <div id="out-topics-card" class="w-full border-4 rounded-3xl p-7 flex flex-col relative overflow-hidden transition-all duration-300">
                             <div class="flex items-center gap-3 mb-3">
-                                <span class="p-1.5 bg-red-600 text-white rounded-lg shadow-sm"><i data-lucide="lightbulb" class="w-4 h-4 text-white"></i></span>
-                                <h4 id="out-topics-title" class="text-xl font-black tracking-tight text-red-600">勉強トピックス</h4>
+                                <span id="out-topics-icon-bg" class="p-1.5 text-white rounded-lg shadow-sm"><i data-lucide="lightbulb" class="w-4 h-4 text-white"></i></span>
+                                <h4 id="out-topics-title" class="text-xl font-black tracking-tight font-biz">勉強トピックス</h4>
                             </div>
-                            <p id="out-topics-content" class="text-lg font-bold leading-relaxed whitespace-pre-wrap text-slate-800"></p>
+                            <p id="out-topics-content" class="text-lg font-bold leading-relaxed whitespace-pre-wrap text-slate-800 font-biz"></p>
                         </div>
                     </div>
 
                     <!-- フッター -->
                     <footer class="mt-14 border-t border-slate-100 pt-8 flex justify-between items-baseline italic">
-                        <div class="text-[12px] font-black tracking-[0.5em] text-slate-200 uppercase font-inter">Board Design OS 5.3 UD PRO</div>
+                        <div class="text-[12px] font-black tracking-[0.5em] text-slate-200 uppercase font-inter">Board Design OS 5.4 UD PRO</div>
                         <div id="out-time" class="text-6xl font-black tracking-tighter font-inter text-slate-900">00:00</div>
                     </footer>
                 </div>
@@ -446,14 +426,36 @@
             'その他': { spine: '#64748b', text: 'text-slate-500', bg: 'rgba(100,116,139,0.03)' }
         };
 
+        // 🎨 【新機能】勉強トピックスのカラー定義マップ
+        const topicsColors = {
+            'red': { border: 'border-red-600', text: 'text-red-600', bg: 'bg-red-50/15', darkBg: 'rgba(220,38,38,0.05)', icon: 'bg-red-600' },
+            'blue': { border: 'border-blue-600', text: 'text-blue-600', bg: 'bg-blue-50/15', darkBg: 'rgba(37,99,235,0.05)', icon: 'bg-blue-600' },
+            'emerald': { border: 'border-emerald-600', text: 'text-emerald-600', bg: 'bg-emerald-50/15', darkBg: 'rgba(16,185,129,0.05)', icon: 'bg-emerald-600' },
+            'orange': { border: 'border-orange-500', text: 'text-orange-500', bg: 'bg-orange-50/15', darkBg: 'rgba(249,115,22,0.05)', icon: 'bg-orange-500' },
+            'purple': { border: 'border-purple-600', text: 'text-purple-600', bg: 'bg-purple-50/15', darkBg: 'rgba(147,51,234,0.05)', icon: 'bg-purple-600' }
+        };
+
+        // 📝 【バリエーション追加】豊富な勉強Tipsプリセット
         const topicsPresets = {
             pomodoro: {
                 title: "⏱️ ポモドーロ・テクニック（25分集中法）",
-                content: "「25分の集中＋5分の完全休憩」を1回分（1ポモドーロ）として繰り返す勉強法。タイマーをセットするだけで脳がブーストし、途切れがちな集中力を限界まで持続させることができます！"
+                content: "「25分集中＋5分完全休憩」を1セットにする勉強法。タイマーをかけることで脳の締切効果が発動し、驚くほど高い集中力を維持できます。まずは1セットから挑戦しよう！",
+                color: "emerald"
             },
             ebbinghaus: {
-                title: "📈 科学的な定着サイクル（復習タイミング）",
-                content: "記憶を100%残すための最強スケジュール。何かを学んだら【その日の夜】【翌朝】【1週間後】の3ステップで、それぞれ5分間だけ教科書やワークを見直しましょう。これだけで脳は重要知識だと判断します！"
+                title: "📈 忘却曲線に勝つ科学的な復習サイクル",
+                content: "人の脳は翌日には7割以上を忘れます。記憶を完全に定着させるゴールデンタイミングは、【その日の夜】【翌朝】【1週間後】の3回！それぞれ5分見直すだけで効果は絶大です。",
+                color: "blue"
+            },
+            exam_plan: {
+                title: "📝 テスト勉強の計画を崩さないコツ",
+                content: "計画は「やることベース」ではなく「時間ブロック」で確保するのが正解。さらに、1週間のうち「日曜日」をあらかじめ「遅れを取り戻すための予備日（空き日）」にしておくと、計画倒れが防げます。",
+                color: "purple"
+            },
+            memory_tip: {
+                title: "🧠 暗記効率を3倍にするインプット術",
+                content: "ただ教科書を読むのは非効率。暗記したい用語は「声に出して読みながら紙に殴り書きする（五感を使う）」か、「1枚の暗記カードにして自分自身にクイズを出す（思い出す負荷をかける）」と定着が劇的に早まります。",
+                color: "orange"
             }
         };
 
@@ -464,7 +466,7 @@
         ];
         
         let calendarEvents = {};
-        let topicsData = { title: '', content: '' };
+        let topicsData = { title: '', content: '', color: 'red' };
         let currentCalDate = new Date();
         let selectedDateStr = "";
         let sortableInstance = null;
@@ -485,14 +487,13 @@
                 cdDate: getV('in-cd-date'),
                 typhoonEnable: getV('in-typhoon-enable'),
                 typhoonTitle: getV('in-typhoon-title'),
-                typhoonLevel: getV('in-typhoon-level'),
                 typhoonDesc: getV('in-typhoon-desc')
             };
-            localStorage.setItem('boardOS_v5_3_data', JSON.stringify(data));
+            localStorage.setItem('boardOS_v5_4_data', JSON.stringify(data));
         }
 
         function loadFromLocal() {
-            const saved = localStorage.getItem('boardOS_v5_3_data');
+            const saved = localStorage.getItem('boardOS_v5_4_data');
             if (saved) {
                 const data = JSON.parse(saved);
                 const setV = (id, val) => { 
@@ -505,7 +506,7 @@
                 periods = data.periods || Array(8).fill('');
                 sections = data.sections || [];
                 calendarEvents = data.calendarEvents || {};
-                topicsData = data.topicsData || { title: '', content: '' };
+                topicsData = data.topicsData || { title: '', content: '', color: 'red' };
                 
                 setV('in-theme', data.theme || 'white');
                 setV('in-temp', data.temp || '');
@@ -519,11 +520,11 @@
                 setV('in-cd-date', data.cdDate || '2026-06-26');
                 setV('in-typhoon-enable', data.typhoonEnable || false);
                 setV('in-typhoon-title', data.typhoonTitle || '台風情報');
-                setV('in-typhoon-level', data.typhoonLevel || '警戒レベル不要');
                 setV('in-typhoon-desc', data.typhoonDesc || '');
 
                 document.getElementById('in-topics-title').value = topicsData.title || '';
                 document.getElementById('in-topics-content').value = topicsData.content || '';
+                document.getElementById('in-topics-color').value = topicsData.color || 'red';
 
                 if(document.getElementById('font-size-val')) {
                     document.getElementById('font-size-val').innerText = (data.fontSize || 32) + 'px';
@@ -533,12 +534,12 @@
 
         function clearStorage() {
             if(confirm('設定をすべてリセットしますか？')) {
-                localStorage.removeItem('boardOS_v5_3_data');
+                localStorage.removeItem('boardOS_v5_4_data');
                 location.reload();
             }
         }
 
-        // 月カレンダーUI生成
+        // 月間カレンダーUI構築
         function changeMonth(dir) {
             currentCalDate.setMonth(currentCalDate.getMonth() + dir);
             generateCalendarGrid();
@@ -620,16 +621,21 @@
             }
         }
 
-        // 勉強トピックスプリセット
+        // 勉強トピックスプリセット反映
         function applyTopicsPreset(type) {
-            if(type === 'clear') { topicsData = { title: '', content: '' }; }
-            else { topicsData = { title: topicsPresets[type].title, content: topicsPresets[type].content }; }
+            if(type === 'clear') {
+                topicsData = { title: '', content: '', color: 'red' };
+            } else {
+                const preset = topicsPresets[type];
+                topicsData = { title: preset.title, content: preset.content, color: preset.color };
+            }
             document.getElementById('in-topics-title').value = topicsData.title;
             document.getElementById('in-topics-content').value = topicsData.content;
+            document.getElementById('in-topics-color').value = topicsData.color;
             render();
         }
 
-        // 気象データ
+        // 気象API連携
         async function fetchAllWeatherData() {
             try {
                 const weatherRes = await fetch('https://www.jma.go.jp/bosai/forecast/data/forecast/040000.json');
@@ -662,7 +668,6 @@
             } catch(e) { alert('台風データの取得に失敗しました。'); }
         }
 
-        // 各種パーツ同期
         function updateTimetableInputs() {
             const count = parseInt(document.getElementById('in-total-periods').value) || 6;
             const container = document.getElementById('timetable-inputs-container');
@@ -738,13 +743,14 @@
                 .replace(/["”](.+?)["”]/g, '<strong>$1</strong>');
         }
 
-        // キャンバスレンダリング
+        // メイン描画エンジン
         function render() {
             const getV = (id) => document.getElementById(id).value;
             const getC = (id) => document.getElementById(id).checked;
             
             const canvas = document.getElementById('board-canvas');
-            if(getV('in-theme') === 'dark') canvas.classList.add('theme-dark');
+            const isDark = (getV('in-theme') === 'dark');
+            if(isDark) canvas.classList.add('theme-dark');
             else canvas.classList.remove('theme-dark');
 
             document.getElementById('out-temp').innerText = getV('in-temp');
@@ -778,12 +784,10 @@
             if(getC('in-typhoon-enable')) {
                 typhoonArea.classList.remove('hidden');
                 document.getElementById('out-typhoon-title').innerText = getV('in-typhoon-title');
-                const lvl = getV('in-typhoon-level');
-                document.getElementById('out-typhoon-level').innerText = lvl === '警戒レベル不要' ? '' : lvl;
                 document.getElementById('out-typhoon-desc').innerText = getV('in-typhoon-desc');
             } else { typhoonArea.classList.add('hidden'); }
 
-            // 時間割(数字フォント：Inter)
+            // 時間割
             const count = parseInt(getV('in-total-periods'));
             document.getElementById('out-timetable').innerHTML = Array.from({length:count}).map((_, i) => `
                 <div class="border-[3px] border-slate-900 rounded-3xl p-5 text-center bg-white shadow-sm">
@@ -791,7 +795,7 @@
                     <p class="text-4xl font-bold leading-none tracking-tighter text-slate-900 font-biz">${periods[i] || '-'}</p>
                 </div>`).join('');
 
-            // 本のデザイン：今後の予定ライン(英数字日付：Inter)
+            // 📕 【修正点】「今後の予定ライン」重要マーク時は強固な「赤縁取り」にリファイナンス
             const timelineBar = document.getElementById('out-timeline-bar');
             const sortedDates = Object.keys(calendarEvents).sort((a,b) => new Date(a) - new Date(b));
             
@@ -800,24 +804,27 @@
             } else {
                 timelineBar.innerHTML = sortedDates.map(dateKey => {
                     const e = calendarEvents[dateKey];
-                    const style = subjectStyles[e.subject] || subjectStyles['その他'];
-                    const bookmarkHTML = e.important ? `<div class="bookmark-ribbon"></div>` : '';
+                    const style = subjectStyles[e.subject] || subjectStyles['鎖外'];
+                    
+                    // 重要フラグ（赤縁取り）か通常の細縁か
+                    const borderStyle = e.important 
+                        ? 'border-4 border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.25)]' 
+                        : (isDark ? 'border border-[#262626]' : 'border border-slate-100');
                     
                     return `
-                        <div class="book-container flex-shrink-0 w-[240px] p-5 border-l-[14px] text-left font-biz" style="border-color: ${style.spine}; background-color: ${style.bg}">
-                            ${bookmarkHTML}
+                        <div class="book-container flex-shrink-0 w-[240px] p-5 border-l-[14px] text-left font-biz ${borderStyle}" style="border-left-color: ${style.spine}; background-color: ${style.bg}">
                             <div class="flex justify-between items-center mb-3 font-inter">
                                 <span class="text-xs font-black tracking-tight opacity-40">${dateKey.substring(5).replace('-','/')}</span>
                                 <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-slate-900 text-white shadow-sm font-biz subject-label">${e.subject}</span>
                             </div>
-                            <h4 class="text-lg font-bold truncate pr-6 text-slate-900">${e.title}</h4>
+                            <h4 class="text-lg font-bold truncate text-slate-900">${e.title}</h4>
                             <p class="text-xs font-medium opacity-60 line-clamp-2 mt-1 leading-tight">${e.desc || '詳細なし'}</p>
                         </div>
                     `;
                 }).join('');
             }
 
-            // 前日自動連携 & 通常項目
+            // 通常セクション描画
             const fontSize = getV('in-font-size') || 32;
             const gridContainer = document.getElementById('out-sections-grid');
             
@@ -835,7 +842,7 @@
                             【明日の予定自動連携】 (${tomorrowEvent.subject}) — ${tomorrowEvent.title}
                         </h3>
                         <div class="font-bold tracking-tight leading-[1.3]" style="font-size: ${fontSize}px;">
-                            ${formatText(tomorrowEvent.desc) || "明日の詳細・範囲を確認してください。"}
+                            ${formatText(tomorrowEvent.desc) || "明日の詳細・提出物等を確認してください。"}
                         </div>
                     </section>
                 `;
@@ -863,28 +870,54 @@
 
             gridContainer.innerHTML = tomorrowHTML + normalHTML;
 
-            // 🔴 勉強トピックス（最下部・太赤縁洗練デザインカード）
+            // 🔴 【修正点】勉強トピックス（最下部・可変カラー太縁・背景最適化）
             const topicsArea = document.getElementById('out-topics-area');
             const topicsTitleInput = getV('in-topics-title').trim();
             const topicsContentInput = getV('in-topics-content').trim();
+            const selectedColorKey = getV('in-topics-color') || 'red';
             
             if(topicsTitleInput || topicsContentInput) {
                 topicsArea.classList.remove('hidden');
-                document.getElementById('out-topics-title').innerText = topicsTitleInput || '勉強トピックス';
+                
+                const cardEl = document.getElementById('out-topics-card');
+                const iconBgEl = document.getElementById('out-topics-icon-bg');
+                const titleEl = document.getElementById('out-topics-title');
+                
+                // 選択した色に基づいてスタイルクラスを一括適用
+                const col = topicsColors[selectedColorKey];
+                
+                // クラスのクリア
+                cardEl.className = "w-full border-4 rounded-3xl p-7 flex flex-col relative overflow-hidden transition-all duration-300";
+                iconBgEl.className = "p-1.5 text-white rounded-lg shadow-sm";
+                titleEl.className = "text-xl font-black tracking-tight font-biz";
+                
+                // 動的付与
+                cardEl.classList.add(col.border);
+                if(isDark) {
+                    cardEl.style.backgroundColor = col.darkBg;
+                } else {
+                    cardEl.classList.add(col.bg);
+                }
+                
+                iconBgEl.classList.add(col.icon);
+                titleEl.classList.add(col.text);
+
+                titleEl.innerText = topicsTitleInput || '勉強トピックス';
                 document.getElementById('out-topics-content').innerText = topicsContentInput;
             } else { topicsArea.classList.add('hidden'); }
 
-            // 時計(フォント：Inter)
+            // リアルタイム時計
             document.getElementById('out-time').innerText = new Date().toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit'});
             
             topicsData.title = topicsTitleInput;
             topicsData.content = topicsContentInput;
+            topicsData.color = selectedColorKey;
             
             lucide.createIcons();
             saveToLocal();
         }
 
-        // 初期ロード
+        // 初期セットアップ
         const targetD = new Date();
         document.getElementById('out-date').innerText = `${targetD.getMonth()+1}/${targetD.getDate()} (${['日','月','火','水','木','金','土'][targetD.getDay()]})`;
         
@@ -893,10 +926,11 @@
         updateTimetableInputs();
         updateSectionInputs();
 
+        // 画像高画質保存
         async function exportImage() {
             const node = document.getElementById('board-canvas');
             const now = new Date();
-            const fileName = `BoardOS_v5.3_${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}.png`;
+            const fileName = `BoardOS_v5.4_${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}.png`;
             try {
                 const dataUrl = await htmlToImage.toPng(node, { pixelRatio: 3 });
                 const link = document.createElement('a');
