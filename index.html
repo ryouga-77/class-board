@@ -3,18 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学級掲示板 OS v5.4 UD PRO</title>
+    <title>学級掲示板 OS v5.6 UD PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Inter:wght@100;300;400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap');
         
         :root { --bg: #080808; --card: #121212; --border: #1f1f1f; }
-        
-        .font-biz { font-family: 'BIZ UDPGothic', sans-serif; }
-        .font-inter { font-family: 'Inter', sans-serif; }
         
         body { 
             font-family: 'BIZ UDPGothic', sans-serif; 
@@ -37,18 +34,21 @@
             display: flex; 
             flex-direction: column; 
             position: relative; 
+            font-family: 'BIZ UDPGothic', sans-serif;
         }
 
         #board-canvas.theme-dark { background: #000000; color: #ffffff; }
         #board-canvas.theme-dark .text-slate-900 { color: #ffffff; }
+        #board-canvas.theme-dark .text-slate-800 { color: #eeeeee; }
         #board-canvas.theme-dark .text-slate-400 { color: #888888; }
         #board-canvas.theme-dark .text-slate-300 { color: #444444; }
         #board-canvas.theme-dark .border-black { border-color: #ffffff; }
         #board-canvas.theme-dark .border-slate-900 { border-color: #222222; }
+        #board-canvas.theme-dark .border-slate-100 { border-color: #1a1a1a; }
+        #board-canvas.theme-dark .border-slate-200 { border-color: #262626; }
         #board-canvas.theme-dark .bg-slate-50 { background: #0e0e0e; border: 1px solid #222; }
         #board-canvas.theme-dark .bg-white { background: #161616; border-color: #262626; }
         #board-canvas.theme-dark i { color: #ffffff !important; }
-        #board-canvas.theme-dark .subject-label { color: #ffffff !important; background: #222 !important; }
 
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         
@@ -81,12 +81,20 @@
             background: repeating-linear-gradient(-45deg, #dc2626, #dc2626 20px, #b91c1c 20px, #b91c1c 40px);
         }
 
-        /* 📕 本のデザイン（Book Style）基盤 */
-        .book-container {
+        /* 予定ライン：モジュラーカードUI */
+        .timeline-card {
             position: relative;
-            box-shadow: 2px 4px 12px rgba(0,0,0,0.05), inset -1px 0 2px rgba(0,0,0,0.02);
-            border-radius: 4px 12px 12px 4px;
-            transition: all 0.2s ease;
+            background: #ffffff;
+            border-radius: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.02);
+            display: flex;
+            align-items: stretch;
+            overflow: hidden;
+        }
+        #board-canvas.theme-dark .timeline-card {
+            background: #121212;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4), 0 1px 3px rgba(255,255,255,0.02);
         }
 
         .calendar-cell.active {
@@ -99,10 +107,10 @@
 
     <div class="max-w-[1450px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10">
         
-        <!-- 左パネル: 各種設定・操作 -->
+        <!-- 左パネル: コントロール＆設定 -->
         <div class="lg:col-span-5 space-y-6 overflow-y-auto max-h-screen pr-4 pb-20 hide-scrollbar">
             <header class="flex justify-between items-center border-b border-[#1f1f1f] pb-4">
-                <h1 class="text-2xl font-black font-inter tracking-tighter uppercase italic">Board OS <span class="text-blue-500">v5.4 UD</span></h1>
+                <h1 class="text-2xl font-bold italic tracking-tighter uppercase">Board OS <span class="text-blue-500">v5.6 UD</span></h1>
                 <button onclick="fetchAllWeatherData()" class="text-[10px] font-bold bg-blue-600 px-4 py-2 rounded-full hover:bg-blue-500 transition-all flex items-center gap-2">
                     <i data-lucide="cloud-rain" class="w-3.5 h-3.5"></i> 気象取得
                 </button>
@@ -117,8 +125,8 @@
                     <div>
                         <label class="text-[10px] font-bold text-slate-500 tracking-widest ml-1 mb-1 block">テーマ</label>
                         <select id="in-theme" class="matte-input w-full p-3 rounded-2xl font-bold text-sm" oninput="render()">
-                            <option value="white">⚪ White UD</option>
-                            <option value="dark">⚫ Dark UD</option>
+                            <option value="white">White UD</option>
+                            <option value="dark">Dark UD</option>
                         </select>
                     </div>
                     <div>
@@ -134,11 +142,11 @@
                     <div>
                         <label class="text-[10px] font-bold text-slate-500 tracking-widest ml-1 mb-1 block">天気</label>
                         <select id="in-weather" class="matte-input w-full p-3 rounded-2xl font-bold text-sm" oninput="render()">
-                            <option value="sun">☀️ 晴れ</option>
-                            <option value="cloud">☁️ 曇り</option>
-                            <option value="cloud-rain">☔ 雨</option>
-                            <option value="snowflake">❄️ 雪</option>
-                            <option value="cloud-lightning">⚡ 雷雨</option>
+                            <option value="sun">晴れ</option>
+                            <option value="cloud">曇り</option>
+                            <option value="cloud-rain">雨</option>
+                            <option value="snowflake">雪</option>
+                            <option value="cloud-lightning">雷雨</option>
                         </select>
                     </div>
                     <div>
@@ -149,7 +157,7 @@
                 <div>
                     <label class="flex justify-between text-[10px] font-bold text-slate-500 tracking-widest ml-1 mb-1">
                         <span>本文の文字サイズ</span>
-                        <span id="font-size-val" class="font-inter">32px</span>
+                        <span id="font-size-val">32px</span>
                     </label>
                     <input type="range" id="in-font-size" class="w-full accent-blue-500" min="20" max="48" value="32" oninput="document.getElementById('font-size-val').innerText = this.value + 'px'; render();">
                 </div>
@@ -163,12 +171,12 @@
             <div class="bg-[#121212] p-6 rounded-3xl border border-blue-900/30 space-y-4">
                 <div class="flex justify-between items-center">
                     <h3 class="text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] flex items-center gap-2 italic">
-                        <i data-lucide="calendar" class="w-3.5 h-3.5"></i> 月間カレンダーマネージャー
+                        <i data-lucide="calendar" class="w-3.5 h-3.5"></i> カレンダーマネージャー
                     </h3>
-                    <div class="flex gap-2 text-xs font-mono font-bold">
-                        <button onclick="changeMonth(-1)" class="text-slate-400 hover:text-white">◀</button>
-                        <span id="calendar-month-label" class="font-inter">2026/06</span>
-                        <button onclick="changeMonth(1)" class="text-slate-400 hover:text-white">▶</button>
+                    <div class="flex gap-2 text-xs font-bold">
+                        <button onclick="changeMonth(-1)" class="text-slate-400 hover:text-white"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                        <span id="calendar-month-label">2026/06</span>
+                        <button onclick="changeMonth(1)" class="text-slate-400 hover:text-white"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
                     </div>
                 </div>
                 
@@ -179,7 +187,7 @@
 
                 <div class="bg-[#181818] p-4 rounded-2xl border border-zinc-800 space-y-3">
                     <div class="flex justify-between items-center">
-                        <p class="text-[10px] font-bold text-blue-400">選択日: <span id="selected-date-label" class="font-inter text-white">日付を選択してください</span></p>
+                        <p class="text-[10px] font-bold text-blue-400">選択日: <span id="selected-date-label" class="text-white">日付を選択してください</span></p>
                         <button onclick="deleteSelectedEvent()" id="btn-del-event" class="hidden text-[10px] text-red-400 hover:underline">削除</button>
                     </div>
                     
@@ -193,42 +201,41 @@
                             <option value="その他" selected>その他</option>
                         </select>
                         <label class="flex items-center gap-1.5 text-[11px] text-slate-400 cursor-pointer">
-                            <input type="checkbox" id="cal-important" class="accent-red-500"> 🔴 重要（赤縁取り）
+                            <input type="checkbox" id="cal-important" class="accent-red-500"> 
+                            <i data-lucide="flame" class="w-3.5 h-3.5 text-red-500"></i> 重要(赤枠)
                         </label>
                     </div>
                     <input type="text" id="cal-title" class="matte-input w-full p-2.5 rounded-xl text-xs font-bold" placeholder="タイトル（例: 単元テスト）">
-                    <textarea id="cal-desc" class="matte-input w-full p-2.5 rounded-xl text-xs" rows="2" placeholder="詳細内容やテスト範囲など"></textarea>
+                    <textarea id="cal-desc" class="matte-input w-full p-2.5 rounded-xl text-xs" rows="2" placeholder="詳細内容や範囲など"></textarea>
                     <button onclick="saveCalendarEvent()" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl transition-colors">カレンダーに保存</button>
                 </div>
             </div>
 
-            <!-- 💡 【機能拡張】勉強トピックス設定（複数プリセット＆カラーセレクト） -->
+            <!-- 勉強トピックス設定 -->
             <div class="bg-[#121212] p-6 rounded-3xl border border-red-900/30 space-y-4">
                 <h3 class="text-[10px] font-bold text-red-400 uppercase tracking-[0.2em] flex items-center gap-2 italic">
-                    <i data-lucide="lightbulb" class="w-3.5 h-3.5"></i> 勉強トピックス（最下部カード設定）
+                    <i data-lucide="lightbulb" class="w-3.5 h-3.5"></i> 勉強トピックス（最下部カード）
                 </h3>
                 
-                <!-- 豊富なプリセットボタン -->
                 <div>
-                    <label class="text-[9px] font-bold text-slate-500 uppercase block mb-1">トピックス プリセット</label>
+                    <label class="text-[9px] font-bold text-slate-500 block mb-1">プリセットから呼び出し</label>
                     <div class="flex gap-1.5 flex-wrap">
-                        <button onclick="applyTopicsPreset('pomodoro')" class="text-[10px] bg-zinc-800 px-2 py-1 rounded-lg hover:bg-zinc-700 font-bold">⏱️ ポモドーロ</button>
-                        <button onclick="applyTopicsPreset('ebbinghaus')" class="text-[10px] bg-zinc-800 px-2 py-1 rounded-lg hover:bg-zinc-700 font-bold">📈 復習法</button>
-                        <button onclick="applyTopicsPreset('exam_plan')" class="text-[10px] bg-zinc-800 px-2 py-1 rounded-lg hover:bg-zinc-700 font-bold">📝 テスト計画</button>
-                        <button onclick="applyTopicsPreset('memory_tip')" class="text-[10px] bg-zinc-800 px-2 py-1 rounded-lg hover:bg-zinc-700 font-bold">🧠 暗記のコツ</button>
-                        <button onclick="applyTopicsPreset('clear')" class="text-[10px] bg-red-950 text-red-300 px-2 py-1 rounded-lg">クリア</button>
+                        <button onclick="applyTopicsPreset('pomodoro')" class="flex items-center gap-1 text-[10px] bg-zinc-800 px-2.5 py-1.5 rounded-lg hover:bg-zinc-700 font-bold"><i data-lucide="timer" class="w-3 h-3 text-emerald-400"></i> ポモドーロ</button>
+                        <button onclick="applyTopicsPreset('ebbinghaus')" class="flex items-center gap-1 text-[10px] bg-zinc-800 px-2.5 py-1.5 rounded-lg hover:bg-zinc-700 font-bold"><i data-lucide="trending-up" class="w-3 h-3 text-blue-400"></i> 復習法</button>
+                        <button onclick="applyTopicsPreset('exam_plan')" class="flex items-center gap-1 text-[10px] bg-zinc-800 px-2.5 py-1.5 rounded-lg hover:bg-zinc-700 font-bold"><i data-lucide="calendar-check" class="w-3 h-3 text-purple-400"></i> テスト計画</button>
+                        <button onclick="applyTopicsPreset('memory_tip')" class="flex items-center gap-1 text-[10px] bg-zinc-800 px-2.5 py-1.5 rounded-lg hover:bg-zinc-700 font-bold"><i data-lucide="brain" class="w-3 h-3 text-orange-400"></i> 暗記のコツ</button>
+                        <button onclick="applyTopicsPreset('clear')" class="flex items-center gap-1 text-[10px] bg-red-950 text-red-300 px-2.5 py-1.5 rounded-lg"><i data-lucide="trash-2" class="w-3 h-3"></i> クリア</button>
                     </div>
                 </div>
 
-                <!-- 動的カラー変更セレクト -->
                 <div>
-                    <label class="text-[9px] font-bold text-slate-500 uppercase block mb-1">カードの縁取りカラー選択</label>
+                    <label class="text-[9px] font-bold text-slate-500 block mb-1">カードテーマカラー</label>
                     <select id="in-topics-color" class="matte-input w-full p-2.5 rounded-xl font-bold text-xs" oninput="render()">
-                        <option value="red">🔴 パッションレッド（重要・警告）</option>
-                        <option value="blue">🔵 インテリジェンスブルー（数学・ロジック）</option>
-                        <option value="emerald">🟢 リラックスエメラルド（集中・科学）</option>
-                        <option value="orange">🟠 アクティブオレンジ（英語・暗記）</option>
-                        <option value="purple">🟣 クリエイティブパープル（芸術・発想）</option>
+                        <option value="red">パッションレッド</option>
+                        <option value="blue">インテリジェンスブルー</option>
+                        <option value="emerald">リラックスエメラルド</option>
+                        <option value="orange">アクティブオレンジ</option>
+                        <option value="purple">クリエイティブパープル</option>
                     </select>
                 </div>
 
@@ -303,7 +310,7 @@
 
             <div class="pt-6 border-t border-[#1f1f1f] space-y-3">
                 <button onclick="exportImage()" class="w-full py-6 bg-white text-black font-bold rounded-3xl shadow-2xl transition-all text-sm tracking-[0.2em] uppercase hover:bg-slate-200 flex items-center justify-center gap-2">
-                    <i data-lucide="send" class="w-5 h-5"></i> 画像を保存して送信
+                    <i data-lucide="download" class="w-5 h-5"></i> 画像を保存して送信
                 </button>
                 <button onclick="clearStorage()" class="w-full py-2 text-[10px] text-slate-700 hover:text-red-500 transition-colors uppercase tracking-widest">
                     設定をリセット
@@ -319,21 +326,21 @@
                     <!-- ヘッダー -->
                     <header class="flex justify-between items-start border-b-[16px] border-black pb-10 relative">
                         <div>
-                            <div class="text-[14px] font-black tracking-[0.5em] text-slate-300 mb-2 uppercase italic font-inter">Daily Briefing / Murata-Cho</div>
-                            <h2 class="text-7xl font-light tracking-[0.02em] text-slate-900 leading-none font-biz">事務連絡</h2>
+                            <div class="text-[14px] font-bold tracking-[0.5em] text-slate-300 mb-2 uppercase italic">Daily Briefing / Murata-Cho</div>
+                            <h2 class="text-7xl font-bold tracking-[0.02em] text-slate-900 leading-none">事務連絡</h2>
                         </div>
                         
                         <!-- カウントダウン -->
                         <div id="out-cd-area" class="absolute left-1/2 -translate-x-1/2 top-0 hidden flex-col items-center justify-center bg-indigo-50 border border-indigo-200 px-6 py-3 rounded-2xl">
-                            <p id="out-cd-title" class="text-[10px] font-black text-indigo-500 tracking-widest uppercase mb-0.5 font-inter">--</p>
-                            <p class="text-indigo-950 font-bold text-2xl tracking-tighter">あと <span id="out-cd-days" class="text-4xl text-indigo-600 px-0.5 font-black font-inter">--</span> 日</p>
+                            <p id="out-cd-title" class="text-[10px] font-bold text-indigo-500 tracking-widest uppercase mb-0.5">--</p>
+                            <p class="text-indigo-950 font-bold text-2xl tracking-tighter">あと <span id="out-cd-days" class="text-4xl text-indigo-600 px-0.5 font-bold">--</span> 日</p>
                         </div>
 
                         <div class="text-right">
-                            <p id="out-date" class="text-5xl font-black tracking-tighter mb-2 italic font-inter">--/-- (--)</p>
+                            <p id="out-date" class="text-5xl font-bold tracking-tighter mb-2 italic">--/-- (--)</p>
                             <div class="flex flex-col items-end gap-1">
-                                <div id="out-weather-icon" class="bg-white p-1 mb-0.5 rounded-sm shadow-sm border border-slate-100"></div>
-                                <p id="out-temp" class="text-2xl font-bold text-slate-400 italic font-inter">--℃</p>
+                                <div id="out-weather-icon" class="bg-white p-1 mb-0.5 rounded-sm shadow-sm border border-slate-100 flex items-center justify-center w-12 h-12"></div>
+                                <p id="out-temp" class="text-2xl font-bold text-slate-400 italic">--℃</p>
                             </div>
                         </div>
                     </header>
@@ -346,7 +353,7 @@
                                     <i data-lucide="alert-triangle" class="w-8 h-8 text-white"></i>
                                 </div>
                                 <div>
-                                    <h3 id="out-typhoon-title" class="text-4xl font-black text-red-700 tracking-tight">台風情報</h3>
+                                    <h3 id="out-typhoon-title" class="text-4xl font-bold text-red-700 tracking-tight">台風情報</h3>
                                 </div>
                             </div>
                             <p id="out-typhoon-desc" class="text-2xl font-bold text-slate-800 leading-relaxed whitespace-pre-wrap">--</p>
@@ -357,47 +364,47 @@
                     <div class="mt-8 flex gap-4 h-[88px]">
                         <div class="bg-slate-50 px-8 py-5 rounded-3xl flex items-center gap-4 border border-slate-100/60">
                             <i data-lucide="clock" class="w-7 h-7 text-slate-900"></i>
-                            <p class="text-2xl font-black text-slate-900 font-inter"><span id="out-total-periods" class="font-black">6</span><span class="text-lg font-bold ml-0.5 mr-3">HR</span><span class="opacity-20 mr-3">|</span><span id="out-period-min">50</span></p>
+                            <p class="text-2xl font-bold text-slate-900"><span id="out-total-periods" class="font-bold">6</span><span class="text-lg font-bold ml-0.5 mr-3">HR</span><span class="opacity-20 mr-3">|</span><span id="out-period-min">50</span></p>
                         </div>
                         <div id="out-warn-area" class="flex-1 bg-red-600 text-white px-8 py-5 rounded-3xl hidden items-center overflow-hidden">
-                            <marquee id="out-warn-list" scrollamount="12" class="text-3xl font-bold italic uppercase font-inter"></marquee>
+                            <marquee id="out-warn-list" scrollamount="12" class="text-3xl font-bold italic uppercase"></marquee>
                         </div>
                     </div>
 
                     <!-- 時間割 -->
                     <div class="mt-12 mb-4 flex items-baseline gap-4">
-                        <h3 class="text-2xl font-bold tracking-tight text-slate-900 font-biz">次回の時間割</h3>
-                        <span class="text-xs font-black uppercase tracking-[0.3em] text-slate-300 italic font-inter">Time Schedule</span>
+                        <h3 class="text-2xl font-bold tracking-tight text-slate-900">次回の時間割</h3>
+                        <span class="text-xs font-bold uppercase tracking-[0.3em] text-slate-300 italic">Time Schedule</span>
                     </div>
                     <div class="grid grid-cols-6 gap-5" id="out-timetable"></div>
 
-                    <!-- 📕 本のデザイン：今後の予定ライン -->
+                    <!-- 📅 【圧倒的洗練】モダンSaaS風 予定タイムライン -->
                     <div class="mt-12 mb-4 flex items-baseline gap-4">
-                        <h3 class="text-2xl font-bold tracking-tight text-slate-900 font-biz">今後の予定ライン</h3>
-                        <span class="text-xs font-black uppercase tracking-[0.3em] text-slate-300 italic font-inter">Book Rack Timeline</span>
+                        <h3 class="text-2xl font-bold tracking-tight text-slate-900">今後の予定ライン</h3>
+                        <span class="text-xs font-bold uppercase tracking-[0.3em] text-slate-300 italic">Upcoming Events</span>
                     </div>
                     <div id="out-timeline-bar" class="flex gap-6 overflow-x-auto py-3 px-2 tracking-tight hide-scrollbar">
-                        <!-- 動的に背表紙カードが整列 -->
+                        <!-- JSによってSaaSライクなカードが挿入される -->
                     </div>
 
-                    <!-- メイン掲示エリア（いつものデザイン） -->
+                    <!-- メイン掲示エリア -->
                     <div id="out-sections-grid" class="grid grid-cols-2 gap-x-16 gap-y-12 mt-10 flex-1 items-start content-start"></div>
 
-                    <!-- 🔴 【アップデート】洗練された勉強トピックスカード（最下部固定・可変カラー太縁） -->
+                    <!-- 💡 勉強トピックス（最下部固定・可変カラー太縁・SaaS風アイコンバッジ） -->
                     <div id="out-topics-area" class="mt-12 hidden">
                         <div id="out-topics-card" class="w-full border-4 rounded-3xl p-7 flex flex-col relative overflow-hidden transition-all duration-300">
                             <div class="flex items-center gap-3 mb-3">
-                                <span id="out-topics-icon-bg" class="p-1.5 text-white rounded-lg shadow-sm"><i data-lucide="lightbulb" class="w-4 h-4 text-white"></i></span>
-                                <h4 id="out-topics-title" class="text-xl font-black tracking-tight font-biz">勉強トピックス</h4>
+                                <span id="out-topics-icon-bg" class="p-2 text-white rounded-xl shadow-sm"></span>
+                                <h4 id="out-topics-title" class="text-xl font-bold tracking-tight">勉強トピックス</h4>
                             </div>
-                            <p id="out-topics-content" class="text-lg font-bold leading-relaxed whitespace-pre-wrap text-slate-800 font-biz"></p>
+                            <p id="out-topics-content" class="text-lg font-bold leading-relaxed whitespace-pre-wrap text-slate-800"></p>
                         </div>
                     </div>
 
                     <!-- フッター -->
                     <footer class="mt-14 border-t border-slate-100 pt-8 flex justify-between items-baseline italic">
-                        <div class="text-[12px] font-black tracking-[0.5em] text-slate-200 uppercase font-inter">Board Design OS 5.4 UD PRO</div>
-                        <div id="out-time" class="text-6xl font-black tracking-tighter font-inter text-slate-900">00:00</div>
+                        <div class="text-[12px] font-bold tracking-[0.5em] text-slate-300 uppercase">Board Design OS 5.6 UD PRO</div>
+                        <div id="out-time" class="text-6xl font-bold tracking-tighter text-slate-900">00:00</div>
                     </footer>
                 </div>
             </div>
@@ -408,7 +415,7 @@
         const subjectPresets = {
             'pencil': '宿題・自学', 'megaphone': '事務連絡', 'book': '国語', 'calculator': '数学',
             'microscope': '理科', 'languages': '英語', 'map': '社会', 'music': '音楽',
-            'palette': '美術', 'dumbbell': '保健体育', 'alert-circle': '【重要】', 'shopping-bag': '持ち物'
+            'palette': '美術', 'dumbbell': '保健体育', 'alert-circle': '重要', 'shopping-bag': '持ち物'
         };
 
         const iconLabels = {
@@ -417,45 +424,44 @@
             'palette': '美術', 'dumbbell': '体育', 'alert-circle': '重要', 'shopping-bag': '持物'
         };
 
-        const subjectStyles = {
-            '国語': { spine: '#ef4444', text: 'text-red-500', bg: 'rgba(239,68,68,0.03)' },
-            '数学': { spine: '#3b82f6', text: 'text-blue-500', bg: 'rgba(59,130,246,0.03)' },
-            '英語': { spine: '#f97316', text: 'text-orange-500', bg: 'rgba(249,115,22,0.03)' },
-            '理科': { spine: '#10b981', text: 'text-emerald-500', bg: 'rgba(16,185,129,0.03)' },
-            '社会': { spine: '#eab308', text: 'text-yellow-600', bg: 'rgba(234,179,8,0.03)' },
-            'その他': { spine: '#64748b', text: 'text-slate-500', bg: 'rgba(100,116,139,0.03)' }
+        // 🏫 教科別カラースキーム ＆ Lucideアイコンマッピング
+        const subjectConfig = {
+            '国語': { color: '#ef4444', icon: 'book', bg: 'bg-red-50', text: 'text-red-600', darkBg: 'rgba(239,68,68,0.1)' },
+            '数学': { color: '#3b82f6', icon: 'calculator', bg: 'bg-blue-50', text: 'text-blue-600', darkBg: 'rgba(59,130,246,0.1)' },
+            '英語': { color: '#f97316', icon: 'languages', bg: 'bg-orange-50', text: 'text-orange-600', darkBg: 'rgba(249,115,22,0.1)' },
+            '理科': { color: '#10b981', icon: 'microscope', bg: 'bg-emerald-50', text: 'text-emerald-600', darkBg: 'rgba(16,185,129,0.1)' },
+            '社会': { color: '#eab308', icon: 'map', bg: 'bg-yellow-50', text: 'text-yellow-600', darkBg: 'rgba(234,179,8,0.1)' },
+            'その他': { color: '#64748b', icon: 'paperclip', bg: 'bg-slate-50', text: 'text-slate-600', darkBg: 'rgba(100,116,139,0.1)' }
         };
 
-        // 🎨 【新機能】勉強トピックスのカラー定義マップ
         const topicsColors = {
-            'red': { border: 'border-red-600', text: 'text-red-600', bg: 'bg-red-50/15', darkBg: 'rgba(220,38,38,0.05)', icon: 'bg-red-600' },
-            'blue': { border: 'border-blue-600', text: 'text-blue-600', bg: 'bg-blue-50/15', darkBg: 'rgba(37,99,235,0.05)', icon: 'bg-blue-600' },
-            'emerald': { border: 'border-emerald-600', text: 'text-emerald-600', bg: 'bg-emerald-50/15', darkBg: 'rgba(16,185,129,0.05)', icon: 'bg-emerald-600' },
-            'orange': { border: 'border-orange-500', text: 'text-orange-500', bg: 'bg-orange-50/15', darkBg: 'rgba(249,115,22,0.05)', icon: 'bg-orange-500' },
-            'purple': { border: 'border-purple-600', text: 'text-purple-600', bg: 'bg-purple-50/15', darkBg: 'rgba(147,51,234,0.05)', icon: 'bg-purple-600' }
+            'red': { border: 'border-red-600', text: 'text-red-600', bg: 'bg-red-50/20', darkBg: 'rgba(220,38,38,0.05)', iconBg: 'bg-red-600' },
+            'blue': { border: 'border-blue-600', text: 'text-blue-600', bg: 'bg-blue-50/20', darkBg: 'rgba(37,99,235,0.05)', iconBg: 'bg-blue-600' },
+            'emerald': { border: 'border-emerald-600', text: 'text-emerald-600', bg: 'bg-emerald-50/20', darkBg: 'rgba(16,185,129,0.05)', iconBg: 'bg-emerald-600' },
+            'orange': { border: 'border-orange-500', text: 'text-orange-500', bg: 'bg-orange-50/20', darkBg: 'rgba(249,115,22,0.05)', iconBg: 'bg-orange-500' },
+            'purple': { border: 'border-purple-600', text: 'text-purple-600', bg: 'bg-purple-50/20', darkBg: 'rgba(147,51,234,0.05)', iconBg: 'bg-purple-600' }
         };
 
-        // 📝 【バリエーション追加】豊富な勉強Tipsプリセット
         const topicsPresets = {
             pomodoro: {
-                title: "⏱️ ポモドーロ・テクニック（25分集中法）",
-                content: "「25分集中＋5分完全休憩」を1セットにする勉強法。タイマーをかけることで脳の締切効果が発動し、驚くほど高い集中力を維持できます。まずは1セットから挑戦しよう！",
-                color: "emerald"
+                title: "ポモドーロ・テクニック（25分集中法）",
+                content: "「25分集中＋5分完全休憩」を1セットにする勉強法。タイマーをかけることで脳の締切効果が発動し、高効率な集中状態を維持できます。まずは1セットから挑戦しよう！",
+                color: "emerald", icon: "timer"
             },
             ebbinghaus: {
-                title: "📈 忘却曲線に勝つ科学的な復習サイクル",
-                content: "人の脳は翌日には7割以上を忘れます。記憶を完全に定着させるゴールデンタイミングは、【その日の夜】【翌朝】【1週間後】の3回！それぞれ5分見直すだけで効果は絶大です。",
-                color: "blue"
+                title: "忘却曲線に勝つ科学的な復習サイクル",
+                content: "人の脳は翌日には7割以上を忘れます。記憶を完全に定着させるタイミングは、【その日の夜】【翌朝】【1週間後】の3回！それぞれ5分見直すだけで効果は絶大です。",
+                color: "blue", icon: "trending-up"
             },
             exam_plan: {
-                title: "📝 テスト勉強の計画を崩さないコツ",
-                content: "計画は「やることベース」ではなく「時間ブロック」で確保するのが正解。さらに、1週間のうち「日曜日」をあらかじめ「遅れを取り戻すための予備日（空き日）」にしておくと、計画倒れが防げます。",
-                color: "purple"
+                title: "テスト勉強の計画を崩さないコツ",
+                content: "計画は「やること」ではなく「時間枠」で確保するのが正解。さらに、1週間のうち「日曜日」をあらかじめ「遅れを取り戻すための予備日」にしておくと計画倒れが防げます。",
+                color: "purple", icon: "calendar-check"
             },
             memory_tip: {
-                title: "🧠 暗記効率を3倍にするインプット術",
-                content: "ただ教科書を読むのは非効率。暗記したい用語は「声に出して読みながら紙に殴り書きする（五感を使う）」か、「1枚の暗記カードにして自分自身にクイズを出す（思い出す負荷をかける）」と定着が劇的に早まります。",
-                color: "orange"
+                title: "暗記効率を3倍にするインプット術",
+                content: "ただ教科書を読むのは非効率。暗記したい用語は「声に出して読みながら紙に殴り書きする」か、「暗記カードにして自分自身にクイズを出す」と定着が劇的に早まります。",
+                color: "orange", icon: "brain"
             }
         };
 
@@ -466,7 +472,7 @@
         ];
         
         let calendarEvents = {};
-        let topicsData = { title: '', content: '', color: 'red' };
+        let topicsData = { title: '', content: '', color: 'red', icon: 'lightbulb' };
         let currentCalDate = new Date();
         let selectedDateStr = "";
         let sortableInstance = null;
@@ -489,11 +495,11 @@
                 typhoonTitle: getV('in-typhoon-title'),
                 typhoonDesc: getV('in-typhoon-desc')
             };
-            localStorage.setItem('boardOS_v5_4_data', JSON.stringify(data));
+            localStorage.setItem('boardOS_v5_6_data', JSON.stringify(data));
         }
 
         function loadFromLocal() {
-            const saved = localStorage.getItem('boardOS_v5_4_data');
+            const saved = localStorage.getItem('boardOS_v5_6_data');
             if (saved) {
                 const data = JSON.parse(saved);
                 const setV = (id, val) => { 
@@ -506,7 +512,7 @@
                 periods = data.periods || Array(8).fill('');
                 sections = data.sections || [];
                 calendarEvents = data.calendarEvents || {};
-                topicsData = data.topicsData || { title: '', content: '', color: 'red' };
+                topicsData = data.topicsData || { title: '', content: '', color: 'red', icon: 'lightbulb' };
                 
                 setV('in-theme', data.theme || 'white');
                 setV('in-temp', data.temp || '');
@@ -534,15 +540,15 @@
 
         function clearStorage() {
             if(confirm('設定をすべてリセットしますか？')) {
-                localStorage.removeItem('boardOS_v5_4_data');
+                localStorage.removeItem('boardOS_v5_6_data');
                 location.reload();
             }
         }
 
-        // 月間カレンダーUI構築
         function changeMonth(dir) {
             currentCalDate.setMonth(currentCalDate.getMonth() + dir);
             generateCalendarGrid();
+            lucide.createIcons();
         }
 
         function generateCalendarGrid() {
@@ -562,19 +568,20 @@
                 const hasEvent = calendarEvents[dateStr];
                 const activeCls = (dateStr === selectedDateStr) ? 'calendar-cell active' : '';
                 
-                let dotHTML = '<div class="h-1 w-1 mt-0.5 mx-auto rounded-full bg-transparent"></div>';
+                let dotHTML = '<div class="h-1.5 w-1.5 mt-0.5 mx-auto rounded-full bg-transparent"></div>';
                 if(hasEvent) {
-                    const style = subjectStyles[hasEvent.subject] || subjectStyles['その他'];
-                    dotHTML = `<div class="h-1 w-1 mt-0.5 mx-auto rounded-full" style="background-color: ${style.spine}"></div>`;
+                    const style = subjectConfig[hasEvent.subject] || subjectConfig['その他'];
+                    dotHTML = `<div class="h-1.5 w-1.5 mt-0.5 mx-auto rounded-full" style="background-color: ${style.color}"></div>`;
                 }
 
                 container.innerHTML += `
-                    <button onclick="selectCalendarDate('${dateStr}')" class="p-1 text-center rounded-xl border border-transparent hover:border-zinc-700 transition-all font-inter text-xs ${activeCls}">
+                    <button onclick="selectCalendarDate('${dateStr}')" class="p-1 text-center rounded-xl border border-transparent hover:border-zinc-700 transition-all text-xs ${activeCls}">
                         <span class="block">${day}</span>
                         ${dotHTML}
                     </button>
                 `;
             }
+            lucide.createIcons();
         }
 
         function selectCalendarDate(dateStr) {
@@ -621,13 +628,12 @@
             }
         }
 
-        // 勉強トピックスプリセット反映
         function applyTopicsPreset(type) {
             if(type === 'clear') {
-                topicsData = { title: '', content: '', color: 'red' };
+                topicsData = { title: '', content: '', color: 'red', icon: 'lightbulb' };
             } else {
                 const preset = topicsPresets[type];
-                topicsData = { title: preset.title, content: preset.content, color: preset.color };
+                topicsData = { title: preset.title, content: preset.content, color: preset.color, icon: preset.icon };
             }
             document.getElementById('in-topics-title').value = topicsData.title;
             document.getElementById('in-topics-content').value = topicsData.content;
@@ -635,7 +641,6 @@
             render();
         }
 
-        // 気象API連携
         async function fetchAllWeatherData() {
             try {
                 const weatherRes = await fetch('https://www.jma.go.jp/bosai/forecast/data/forecast/040000.json');
@@ -673,7 +678,7 @@
             const container = document.getElementById('timetable-inputs-container');
             container.innerHTML = '';
             for(let i=0; i<count; i++) {
-                container.innerHTML += `<div class="flex items-center gap-2"><span class="text-[10px] font-black text-slate-600 font-inter w-4">${i+1}</span><input type="text" class="matte-input flex-1 p-3 rounded-xl font-bold text-sm" value="${periods[i] || ''}" oninput="periods[${i}]=this.value; render();"></div>`;
+                container.innerHTML += `<div class="flex items-center gap-2"><span class="text-[10px] font-bold w-4">${i+1}</span><input type="text" class="matte-input flex-1 p-3 rounded-xl font-bold text-sm" value="${periods[i] || ''}" oninput="periods[${i}]=this.value; render();"></div>`;
             }
             render();
         }
@@ -720,7 +725,6 @@
                 }
             });
             lucide.createIcons();
-            render();
         }
 
         function handleIconChange(id, newIcon) {
@@ -728,6 +732,7 @@
             section.icon = newIcon;
             section.title = subjectPresets[newIcon];
             updateSectionInputs();
+            render();
         }
 
         function updateSectionData(id, key, val) {
@@ -743,7 +748,7 @@
                 .replace(/["”](.+?)["”]/g, '<strong>$1</strong>');
         }
 
-        // メイン描画エンジン
+        // 🎨 メインレンダリングエンジン
         function render() {
             const getV = (id) => document.getElementById(id).value;
             const getC = (id) => document.getElementById(id).checked;
@@ -754,7 +759,7 @@
             else canvas.classList.remove('theme-dark');
 
             document.getElementById('out-temp').innerText = getV('in-temp');
-            document.getElementById('out-weather-icon').innerHTML = `<i data-lucide="${getV('in-weather')}" class="w-10 h-10 text-black"></i>`;
+            document.getElementById('out-weather-icon').innerHTML = `<i data-lucide="${getV('in-weather')}" class="w-8 h-8 text-black"></i>`;
             document.getElementById('out-total-periods').innerText = getV('in-total-periods');
             
             const minV = getV('in-period-min');
@@ -787,44 +792,66 @@
                 document.getElementById('out-typhoon-desc').innerText = getV('in-typhoon-desc');
             } else { typhoonArea.classList.add('hidden'); }
 
-            // 時間割
             const count = parseInt(getV('in-total-periods'));
             document.getElementById('out-timetable').innerHTML = Array.from({length:count}).map((_, i) => `
                 <div class="border-[3px] border-slate-900 rounded-3xl p-5 text-center bg-white shadow-sm">
-                    <p class="text-[11px] font-black text-slate-300 mb-1 uppercase tracking-widest font-inter">${i+1}</p>
-                    <p class="text-4xl font-bold leading-none tracking-tighter text-slate-900 font-biz">${periods[i] || '-'}</p>
+                    <p class="text-[11px] font-bold text-slate-300 mb-1 uppercase tracking-widest">${i+1}</p>
+                    <p class="text-4xl font-bold leading-none tracking-tighter text-slate-900">${periods[i] || '-'}</p>
                 </div>`).join('');
 
-            // 📕 【修正点】「今後の予定ライン」重要マーク時は強固な「赤縁取り」にリファイナンス
+            // 📅 【究極洗練】SaaS・タスクツールライクなモジュラーカードUIの描画
             const timelineBar = document.getElementById('out-timeline-bar');
             const sortedDates = Object.keys(calendarEvents).sort((a,b) => new Date(a) - new Date(b));
             
             if(sortedDates.length === 0) {
-                timelineBar.innerHTML = `<div class="text-lg font-bold text-slate-300 italic py-4 font-biz">登録された直近の予定はありません</div>`;
+                timelineBar.innerHTML = `<div class="text-lg font-bold text-slate-300 italic py-4">登録された直近の予定はありません</div>`;
             } else {
                 timelineBar.innerHTML = sortedDates.map(dateKey => {
                     const e = calendarEvents[dateKey];
-                    const style = subjectStyles[e.subject] || subjectStyles['鎖外'];
+                    const cfg = subjectConfig[e.subject] || subjectConfig['その他'];
                     
-                    // 重要フラグ（赤縁取り）か通常の細縁か
-                    const borderStyle = e.important 
-                        ? 'border-4 border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.25)]' 
-                        : (isDark ? 'border border-[#262626]' : 'border border-slate-100');
+                    const dateObj = new Date(dateKey);
+                    const monthNum = dateObj.getMonth() + 1;
+                    const dayStr = dateObj.getDate();
+                    const dayOfWeek = ['日','月','火','水','木','金','土'][dateObj.getDay()];
                     
+                    // 重要時のスタイリング（赤い強枠 ＋ 右上の炎アイコンバッジ）
+                    const borderCls = e.important ? 'border-[3px] border-red-500 shadow-[0_8px_20px_rgba(239,68,68,0.2)]' : 'border border-slate-100';
+                    const importantBadge = e.important ? `<div class="absolute -top-3 -right-3 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center shadow-md"><i data-lucide="flame" class="w-4 h-4 text-white"></i></div>` : '';
+                    const tagBg = isDark ? cfg.darkBg : '';
+                    const tagCls = isDark ? cfg.text : `${cfg.bg} ${cfg.text}`;
+
                     return `
-                        <div class="book-container flex-shrink-0 w-[240px] p-5 border-l-[14px] text-left font-biz ${borderStyle}" style="border-left-color: ${style.spine}; background-color: ${style.bg}">
-                            <div class="flex justify-between items-center mb-3 font-inter">
-                                <span class="text-xs font-black tracking-tight opacity-40">${dateKey.substring(5).replace('-','/')}</span>
-                                <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-slate-900 text-white shadow-sm font-biz subject-label">${e.subject}</span>
+                        <div class="timeline-card flex-shrink-0 w-[260px] p-5 ${borderCls}">
+                            ${importantBadge}
+                            <!-- 左端アクセントライン -->
+                            <div class="absolute left-0 top-0 w-1.5 h-full" style="background-color: ${cfg.color}"></div>
+                            
+                            <div class="w-full pl-2">
+                                <div class="flex items-center gap-4 border-b border-slate-100 pb-3 mb-3">
+                                    <!-- 日付アイキャッチ -->
+                                    <div class="flex flex-col items-center justify-center min-w-[36px]">
+                                        <span class="text-[10px] font-bold text-slate-400 leading-none">${monthNum}月</span>
+                                        <span class="text-3xl font-bold text-slate-800 leading-none mt-1 tracking-tighter">${dayStr}</span>
+                                        <span class="text-[9px] font-bold text-slate-400 leading-none mt-1">(${dayOfWeek})</span>
+                                    </div>
+                                    <!-- 縦セパレータ -->
+                                    <div class="w-px h-10 bg-slate-100"></div>
+                                    <!-- タイトルとタグ -->
+                                    <div class="flex-1 min-w-0">
+                                        <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold mb-1.5" style="${isDark ? `background-color: ${tagBg};` : ''}" class="${!isDark ? tagCls : cfg.text}">
+                                            <i data-lucide="${cfg.icon}" class="w-3 h-3"></i> ${e.subject}
+                                        </div>
+                                        <h4 class="text-sm font-bold text-slate-900 truncate w-full">${e.title}</h4>
+                                    </div>
+                                </div>
+                                <p class="text-xs font-medium text-slate-500 line-clamp-2 leading-relaxed h-8">${e.desc || '詳細なし'}</p>
                             </div>
-                            <h4 class="text-lg font-bold truncate text-slate-900">${e.title}</h4>
-                            <p class="text-xs font-medium opacity-60 line-clamp-2 mt-1 leading-tight">${e.desc || '詳細なし'}</p>
                         </div>
                     `;
                 }).join('');
             }
 
-            // 通常セクション描画
             const fontSize = getV('in-font-size') || 32;
             const gridContainer = document.getElementById('out-sections-grid');
             
@@ -836,7 +863,7 @@
             if(tomorrowEvent) {
                 const borderCls = tomorrowEvent.important ? 'border-4 border-red-500 shadow-md' : 'border-[3px] border-blue-500';
                 tomorrowHTML = `
-                    <section class="col-span-2 bg-slate-50 p-8 rounded-3xl ${borderCls} border-dashed font-biz">
+                    <section class="col-span-2 bg-slate-50 p-8 rounded-3xl ${borderCls} border-dashed">
                         <h3 class="text-[14px] font-bold uppercase tracking-[0.3em] mb-4 text-slate-900 flex items-center gap-3 italic">
                             <span class="p-2 bg-black text-white rounded-xl shadow-sm"><i data-lucide="calendar-clock" class="w-4 h-4 text-white"></i></span> 
                             【明日の予定自動連携】 (${tomorrowEvent.subject}) — ${tomorrowEvent.title}
@@ -849,8 +876,8 @@
             }
 
             const normalHTML = sections.map(s => `
-                <section class="${s.width === 'full' ? 'col-span-2' : ''} font-biz">
-                    <h3 class="text-[14px] font-light uppercase tracking-[0.4em] mb-8 text-slate-400 flex items-center gap-4 italic">
+                <section class="${s.width === 'full' ? 'col-span-2' : ''}">
+                    <h3 class="text-[14px] font-bold uppercase tracking-[0.4em] mb-8 text-slate-400 flex items-center gap-4 italic">
                         <span class="p-2.5 bg-white rounded-xl shadow-sm border border-slate-100"><i data-lucide="${s.icon}" class="w-5 h-5 text-black"></i></span> ${s.title}
                     </h3>
                     <div class="space-y-6">
@@ -870,7 +897,7 @@
 
             gridContainer.innerHTML = tomorrowHTML + normalHTML;
 
-            // 🔴 【修正点】勉強トピックス（最下部・可変カラー太縁・背景最適化）
+            // 💡 勉強トピックス (完全Lucide化＋カラー対応)
             const topicsArea = document.getElementById('out-topics-area');
             const topicsTitleInput = getV('in-topics-title').trim();
             const topicsContentInput = getV('in-topics-content').trim();
@@ -882,42 +909,40 @@
                 const cardEl = document.getElementById('out-topics-card');
                 const iconBgEl = document.getElementById('out-topics-icon-bg');
                 const titleEl = document.getElementById('out-topics-title');
+                const contentEl = document.getElementById('out-topics-content');
                 
-                // 選択した色に基づいてスタイルクラスを一括適用
                 const col = topicsColors[selectedColorKey];
+                const presetIcon = topicsData.icon || 'lightbulb';
                 
-                // クラスのクリア
                 cardEl.className = "w-full border-4 rounded-3xl p-7 flex flex-col relative overflow-hidden transition-all duration-300";
-                iconBgEl.className = "p-1.5 text-white rounded-lg shadow-sm";
-                titleEl.className = "text-xl font-black tracking-tight font-biz";
+                iconBgEl.className = "p-2 text-white rounded-xl shadow-sm";
+                titleEl.className = "text-xl font-bold tracking-tight";
                 
-                // 動的付与
                 cardEl.classList.add(col.border);
-                if(isDark) {
-                    cardEl.style.backgroundColor = col.darkBg;
-                } else {
-                    cardEl.classList.add(col.bg);
-                }
+                if(isDark) { cardEl.style.backgroundColor = col.darkBg; } 
+                else { cardEl.classList.add(col.bg); }
                 
-                iconBgEl.classList.add(col.icon);
+                iconBgEl.classList.add(col.iconBg);
+                iconBgEl.innerHTML = `<i data-lucide="${presetIcon}" class="w-5 h-5 text-white"></i>`;
+                
                 titleEl.classList.add(col.text);
 
                 titleEl.innerText = topicsTitleInput || '勉強トピックス';
-                document.getElementById('out-topics-content').innerText = topicsContentInput;
+                contentEl.innerText = topicsContentInput;
             } else { topicsArea.classList.add('hidden'); }
 
-            // リアルタイム時計
             document.getElementById('out-time').innerText = new Date().toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit'});
             
             topicsData.title = topicsTitleInput;
             topicsData.content = topicsContentInput;
             topicsData.color = selectedColorKey;
             
+            // Lucideアイコンの再描画を確実に実行
             lucide.createIcons();
             saveToLocal();
         }
 
-        // 初期セットアップ
+        // 初期ロード
         const targetD = new Date();
         document.getElementById('out-date').innerText = `${targetD.getMonth()+1}/${targetD.getDate()} (${['日','月','火','水','木','金','土'][targetD.getDay()]})`;
         
@@ -926,11 +951,10 @@
         updateTimetableInputs();
         updateSectionInputs();
 
-        // 画像高画質保存
         async function exportImage() {
             const node = document.getElementById('board-canvas');
             const now = new Date();
-            const fileName = `BoardOS_v5.4_${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}.png`;
+            const fileName = `BoardOS_v5.6_${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}.png`;
             try {
                 const dataUrl = await htmlToImage.toPng(node, { pixelRatio: 3 });
                 const link = document.createElement('a');
