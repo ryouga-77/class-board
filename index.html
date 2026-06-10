@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学級掲示板 OS v5.6 UD PRO</title>
+    <title>学級掲示板 OS v5.0 Final</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -23,7 +23,6 @@
         .matte-input { background: var(--card); border: 1px solid var(--border); color: #fff; outline: none; transition: 0.2s; font-family: 'BIZ UDPGothic', sans-serif; }
         .matte-input:focus { border-color: #555; background: #181818; }
         
-        /* 1080px 出力キャンバス */
         #board-canvas { 
             width: 1080px; 
             min-height: 1080px; 
@@ -40,6 +39,7 @@
         #board-canvas.theme-dark { background: #000000; color: #ffffff; }
         #board-canvas.theme-dark .text-slate-900 { color: #ffffff; }
         #board-canvas.theme-dark .text-slate-800 { color: #eeeeee; }
+        #board-canvas.theme-dark .text-slate-500 { color: #aaaaaa; }
         #board-canvas.theme-dark .text-slate-400 { color: #888888; }
         #board-canvas.theme-dark .text-slate-300 { color: #444444; }
         #board-canvas.theme-dark .border-black { border-color: #ffffff; }
@@ -81,7 +81,6 @@
             background: repeating-linear-gradient(-45deg, #dc2626, #dc2626 20px, #b91c1c 20px, #b91c1c 40px);
         }
 
-        /* 予定ライン：モジュラーカードUI */
         .timeline-card {
             position: relative;
             background: #ffffff;
@@ -107,10 +106,10 @@
 
     <div class="max-w-[1450px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10">
         
-        <!-- 左パネル: コントロール＆設定 -->
+        <!-- 左パネル -->
         <div class="lg:col-span-5 space-y-6 overflow-y-auto max-h-screen pr-4 pb-20 hide-scrollbar">
             <header class="flex justify-between items-center border-b border-[#1f1f1f] pb-4">
-                <h1 class="text-2xl font-bold italic tracking-tighter uppercase">Board OS <span class="text-blue-500">v5.6 UD</span></h1>
+                <h1 class="text-2xl font-bold italic tracking-tighter uppercase">Board OS <span class="text-blue-500">v5.0 Final</span></h1>
                 <button onclick="fetchAllWeatherData()" class="text-[10px] font-bold bg-blue-600 px-4 py-2 rounded-full hover:bg-blue-500 transition-all flex items-center gap-2">
                     <i data-lucide="cloud-rain" class="w-3.5 h-3.5"></i> 気象取得
                 </button>
@@ -159,7 +158,7 @@
                         <span>本文の文字サイズ</span>
                         <span id="font-size-val">32px</span>
                     </label>
-                    <input type="range" id="in-font-size" class="w-full accent-blue-500" min="20" max="48" value="32" oninput="document.getElementById('font-size-val').innerText = this.value + 'px'; render();">
+                    <input type="range" id="in-font-size" class="w-full accent-blue-500" min="20" max="48" value="32" oninput="$('font-size-val').innerText = this.value + 'px'; render();">
                 </div>
                 <div>
                     <label class="text-[10px] font-bold text-red-500 tracking-widest ml-1 mb-1 block">緊急連絡（テロップ）</label>
@@ -211,20 +210,35 @@
                 </div>
             </div>
 
-            <!-- 勉強トピックス設定 -->
+            <!-- 勉強トピックス設定（大増量: 15種） -->
             <div class="bg-[#121212] p-6 rounded-3xl border border-red-900/30 space-y-4">
                 <h3 class="text-[10px] font-bold text-red-400 uppercase tracking-[0.2em] flex items-center gap-2 italic">
-                    <i data-lucide="lightbulb" class="w-3.5 h-3.5"></i> 勉強トピックス（最下部カード）
+                    <i data-lucide="lightbulb" class="w-3.5 h-3.5"></i> 勉強トピックス（全15種）
                 </h3>
                 
                 <div>
-                    <label class="text-[9px] font-bold text-slate-500 block mb-1">プリセットから呼び出し</label>
-                    <div class="flex gap-1.5 flex-wrap">
+                    <label class="text-[9px] font-bold text-slate-500 block mb-1">科学的勉強法（11種）</label>
+                    <div class="flex gap-1.5 flex-wrap mb-3">
                         <button onclick="applyTopicsPreset('pomodoro')" class="flex items-center gap-1 text-[10px] bg-zinc-800 px-2.5 py-1.5 rounded-lg hover:bg-zinc-700 font-bold"><i data-lucide="timer" class="w-3 h-3 text-emerald-400"></i> ポモドーロ</button>
-                        <button onclick="applyTopicsPreset('ebbinghaus')" class="flex items-center gap-1 text-[10px] bg-zinc-800 px-2.5 py-1.5 rounded-lg hover:bg-zinc-700 font-bold"><i data-lucide="trending-up" class="w-3 h-3 text-blue-400"></i> 復習法</button>
-                        <button onclick="applyTopicsPreset('exam_plan')" class="flex items-center gap-1 text-[10px] bg-zinc-800 px-2.5 py-1.5 rounded-lg hover:bg-zinc-700 font-bold"><i data-lucide="calendar-check" class="w-3 h-3 text-purple-400"></i> テスト計画</button>
-                        <button onclick="applyTopicsPreset('memory_tip')" class="flex items-center gap-1 text-[10px] bg-zinc-800 px-2.5 py-1.5 rounded-lg hover:bg-zinc-700 font-bold"><i data-lucide="brain" class="w-3 h-3 text-orange-400"></i> 暗記のコツ</button>
-                        <button onclick="applyTopicsPreset('clear')" class="flex items-center gap-1 text-[10px] bg-red-950 text-red-300 px-2.5 py-1.5 rounded-lg"><i data-lucide="trash-2" class="w-3 h-3"></i> クリア</button>
+                        <button onclick="applyTopicsPreset('ebbinghaus')" class="flex items-center gap-1 text-[10px] bg-zinc-800 px-2.5 py-1.5 rounded-lg hover:bg-zinc-700 font-bold"><i data-lucide="trending-up" class="w-3 h-3 text-blue-400"></i> 分散学習</button>
+                        <button onclick="applyTopicsPreset('active_recall')" class="flex items-center gap-1 text-[10px] bg-zinc-800 px-2.5 py-1.5 rounded-lg hover:bg-zinc-700 font-bold"><i data-lucide="book-open" class="w-3 h-3 text-red-400"></i> 想起学習</button>
+                        <button onclick="applyTopicsPreset('feynman')" class="flex items-center gap-1 text-[10px] bg-zinc-800 px-2.5 py-1.5 rounded-lg hover:bg-zinc-700 font-bold"><i data-lucide="mic" class="w-3 h-3 text-blue-400"></i> ファインマン</button>
+                        <button onclick="applyTopicsPreset('interleaving')" class="flex items-center gap-1 text-[10px] bg-zinc-800 px-2.5 py-1.5 rounded-lg hover:bg-zinc-700 font-bold"><i data-lucide="shuffle" class="w-3 h-3 text-emerald-400"></i> 交差学習</button>
+                        <button onclick="applyTopicsPreset('sleep_mem')" class="flex items-center gap-1 text-[10px] bg-zinc-800 px-2.5 py-1.5 rounded-lg hover:bg-zinc-700 font-bold"><i data-lucide="moon" class="w-3 h-3 text-purple-400"></i> 睡眠暗記</button>
+                        <button onclick="applyTopicsPreset('work_excite')" class="flex items-center gap-1 text-[10px] bg-zinc-800 px-2.5 py-1.5 rounded-lg hover:bg-zinc-700 font-bold"><i data-lucide="zap" class="w-3 h-3 text-orange-400"></i> 作業興奮</button>
+                        <button onclick="applyTopicsPreset('chunking')" class="flex items-center gap-1 text-[10px] bg-zinc-800 px-2.5 py-1.5 rounded-lg hover:bg-zinc-700 font-bold"><i data-lucide="layers" class="w-3 h-3 text-emerald-400"></i> チャンク化</button>
+                        <button onclick="applyTopicsPreset('dual_coding')" class="flex items-center gap-1 text-[10px] bg-zinc-800 px-2.5 py-1.5 rounded-lg hover:bg-zinc-700 font-bold"><i data-lucide="image" class="w-3 h-3 text-orange-400"></i> 二重符号化</button>
+                        <button onclick="applyTopicsPreset('if_then')" class="flex items-center gap-1 text-[10px] bg-zinc-800 px-2.5 py-1.5 rounded-lg hover:bg-zinc-700 font-bold"><i data-lucide="git-commit" class="w-3 h-3 text-blue-400"></i> If-Then</button>
+                        <button onclick="applyTopicsPreset('state_dep')" class="flex items-center gap-1 text-[10px] bg-zinc-800 px-2.5 py-1.5 rounded-lg hover:bg-zinc-700 font-bold"><i data-lucide="target" class="w-3 h-3 text-purple-400"></i> 状態依存記憶</button>
+                    </div>
+                    
+                    <label class="text-[9px] font-bold text-slate-500 block mb-1">偉人の言葉（4種）</label>
+                    <div class="flex gap-1.5 flex-wrap">
+                        <button onclick="applyTopicsPreset('quote_edison')" class="flex items-center gap-1 text-[10px] bg-slate-800 px-2.5 py-1.5 rounded-lg hover:bg-slate-700 font-bold"><i data-lucide="quote" class="w-3 h-3 text-red-400"></i> エジソン</button>
+                        <button onclick="applyTopicsPreset('quote_einstein')" class="flex items-center gap-1 text-[10px] bg-slate-800 px-2.5 py-1.5 rounded-lg hover:bg-slate-700 font-bold"><i data-lucide="quote" class="w-3 h-3 text-emerald-400"></i> アインシュタイン</button>
+                        <button onclick="applyTopicsPreset('quote_ford')" class="flex items-center gap-1 text-[10px] bg-slate-800 px-2.5 py-1.5 rounded-lg hover:bg-slate-700 font-bold"><i data-lucide="quote" class="w-3 h-3 text-blue-400"></i> フォード</button>
+                        <button onclick="applyTopicsPreset('quote_james')" class="flex items-center gap-1 text-[10px] bg-slate-800 px-2.5 py-1.5 rounded-lg hover:bg-slate-700 font-bold"><i data-lucide="quote" class="w-3 h-3 text-orange-400"></i> ジェームズ</button>
+                        <button onclick="applyTopicsPreset('clear')" class="flex items-center gap-1 text-[10px] bg-red-950 text-red-300 px-2.5 py-1.5 rounded-lg ml-auto"><i data-lucide="trash-2" class="w-3 h-3"></i> クリア</button>
                     </div>
                 </div>
 
@@ -240,7 +254,7 @@
                 </div>
 
                 <input type="text" id="in-topics-title" class="matte-input w-full p-3 rounded-xl font-bold text-sm" placeholder="トピックスタイトル" oninput="render()">
-                <textarea id="in-topics-content" class="matte-input w-full p-3 rounded-xl text-xs" rows="3" placeholder="勉強法や有益なアドバイスを入力" oninput="render()"></textarea>
+                <textarea id="in-topics-content" class="matte-input w-full p-3 rounded-xl text-xs" rows="5" placeholder="勉強法や名言、出典を入力" oninput="render()"></textarea>
             </div>
 
             <!-- カウントダウン -->
@@ -318,7 +332,7 @@
             </div>
         </div>
 
-        <!-- 右パネル: 1080px 出力グラフィックキャンバス -->
+        <!-- 右パネル: 1080px 出力キャンバス -->
         <div class="lg:col-span-7 flex flex-col items-center">
             <div style="transform: scale(0.44); transform-origin: top center;">
                 <div id="board-canvas" class="shadow-[0_50px_100px_rgba(0,0,0,0.35)]">
@@ -330,7 +344,6 @@
                             <h2 class="text-7xl font-bold tracking-[0.02em] text-slate-900 leading-none">事務連絡</h2>
                         </div>
                         
-                        <!-- カウントダウン -->
                         <div id="out-cd-area" class="absolute left-1/2 -translate-x-1/2 top-0 hidden flex-col items-center justify-center bg-indigo-50 border border-indigo-200 px-6 py-3 rounded-2xl">
                             <p id="out-cd-title" class="text-[10px] font-bold text-indigo-500 tracking-widest uppercase mb-0.5">--</p>
                             <p class="text-indigo-950 font-bold text-2xl tracking-tighter">あと <span id="out-cd-days" class="text-4xl text-indigo-600 px-0.5 font-bold">--</span> 日</p>
@@ -352,9 +365,7 @@
                                 <div class="bg-red-600 p-3 rounded-full animate-pulse">
                                     <i data-lucide="alert-triangle" class="w-8 h-8 text-white"></i>
                                 </div>
-                                <div>
-                                    <h3 id="out-typhoon-title" class="text-4xl font-bold text-red-700 tracking-tight">台風情報</h3>
-                                </div>
+                                <div><h3 id="out-typhoon-title" class="text-4xl font-bold text-red-700 tracking-tight">台風情報</h3></div>
                             </div>
                             <p id="out-typhoon-desc" class="text-2xl font-bold text-slate-800 leading-relaxed whitespace-pre-wrap">--</p>
                         </div>
@@ -378,32 +389,32 @@
                     </div>
                     <div class="grid grid-cols-6 gap-5" id="out-timetable"></div>
 
-                    <!-- 📅 【圧倒的洗練】モダンSaaS風 予定タイムライン -->
+                    <!-- 📅 予定タイムライン -->
                     <div class="mt-12 mb-4 flex items-baseline gap-4">
                         <h3 class="text-2xl font-bold tracking-tight text-slate-900">今後の予定ライン</h3>
                         <span class="text-xs font-bold uppercase tracking-[0.3em] text-slate-300 italic">Upcoming Events</span>
                     </div>
                     <div id="out-timeline-bar" class="flex gap-6 overflow-x-auto py-3 px-2 tracking-tight hide-scrollbar">
-                        <!-- JSによってSaaSライクなカードが挿入される -->
+                        <!-- JS生成エリア -->
                     </div>
 
                     <!-- メイン掲示エリア -->
                     <div id="out-sections-grid" class="grid grid-cols-2 gap-x-16 gap-y-12 mt-10 flex-1 items-start content-start"></div>
 
-                    <!-- 💡 勉強トピックス（最下部固定・可変カラー太縁・SaaS風アイコンバッジ） -->
+                    <!-- 💡 勉強トピックス -->
                     <div id="out-topics-area" class="mt-12 hidden">
                         <div id="out-topics-card" class="w-full border-4 rounded-3xl p-7 flex flex-col relative overflow-hidden transition-all duration-300">
                             <div class="flex items-center gap-3 mb-3">
                                 <span id="out-topics-icon-bg" class="p-2 text-white rounded-xl shadow-sm"></span>
                                 <h4 id="out-topics-title" class="text-xl font-bold tracking-tight">勉強トピックス</h4>
                             </div>
-                            <p id="out-topics-content" class="text-lg font-bold leading-relaxed whitespace-pre-wrap text-slate-800"></p>
+                            <p id="out-topics-content" class="text-[17px] font-bold leading-relaxed whitespace-pre-wrap text-slate-800"></p>
                         </div>
                     </div>
 
                     <!-- フッター -->
                     <footer class="mt-14 border-t border-slate-100 pt-8 flex justify-between items-baseline italic">
-                        <div class="text-[12px] font-bold tracking-[0.5em] text-slate-300 uppercase">Board Design OS 5.6 UD PRO</div>
+                        <div class="text-[12px] font-bold tracking-[0.5em] text-slate-300 uppercase">Board Design OS 5.0 Final</div>
                         <div id="out-time" class="text-6xl font-bold tracking-tighter text-slate-900">00:00</div>
                     </footer>
                 </div>
@@ -412,6 +423,11 @@
     </div>
 
     <script>
+        // DOMヘルパー関数
+        const $ = id => document.getElementById(id);
+        const getV = id => $(id).value;
+        const getC = id => $(id).checked;
+
         const subjectPresets = {
             'pencil': '宿題・自学', 'megaphone': '事務連絡', 'book': '国語', 'calculator': '数学',
             'microscope': '理科', 'languages': '英語', 'map': '社会', 'music': '音楽',
@@ -424,7 +440,6 @@
             'palette': '美術', 'dumbbell': '体育', 'alert-circle': '重要', 'shopping-bag': '持物'
         };
 
-        // 🏫 教科別カラースキーム ＆ Lucideアイコンマッピング
         const subjectConfig = {
             '国語': { color: '#ef4444', icon: 'book', bg: 'bg-red-50', text: 'text-red-600', darkBg: 'rgba(239,68,68,0.1)' },
             '数学': { color: '#3b82f6', icon: 'calculator', bg: 'bg-blue-50', text: 'text-blue-600', darkBg: 'rgba(59,130,246,0.1)' },
@@ -442,27 +457,25 @@
             'purple': { border: 'border-purple-600', text: 'text-purple-600', bg: 'bg-purple-50/20', darkBg: 'rgba(147,51,234,0.05)', iconBg: 'bg-purple-600' }
         };
 
+        // 🧠 15種類の学習テクニック＆偉人の言葉（比率 11:4）
         const topicsPresets = {
-            pomodoro: {
-                title: "ポモドーロ・テクニック（25分集中法）",
-                content: "「25分集中＋5分完全休憩」を1セットにする勉強法。タイマーをかけることで脳の締切効果が発動し、高効率な集中状態を維持できます。まずは1セットから挑戦しよう！",
-                color: "emerald", icon: "timer"
-            },
-            ebbinghaus: {
-                title: "忘却曲線に勝つ科学的な復習サイクル",
-                content: "人の脳は翌日には7割以上を忘れます。記憶を完全に定着させるタイミングは、【その日の夜】【翌朝】【1週間後】の3回！それぞれ5分見直すだけで効果は絶大です。",
-                color: "blue", icon: "trending-up"
-            },
-            exam_plan: {
-                title: "テスト勉強の計画を崩さないコツ",
-                content: "計画は「やること」ではなく「時間枠」で確保するのが正解。さらに、1週間のうち「日曜日」をあらかじめ「遅れを取り戻すための予備日」にしておくと計画倒れが防げます。",
-                color: "purple", icon: "calendar-check"
-            },
-            memory_tip: {
-                title: "暗記効率を3倍にするインプット術",
-                content: "ただ教科書を読むのは非効率。暗記したい用語は「声に出して読みながら紙に殴り書きする」か、「暗記カードにして自分自身にクイズを出す」と定着が劇的に早まります。",
-                color: "orange", icon: "brain"
-            }
+            // 学習テクニック (11種)
+            pomodoro: { title: "ポモドーロ法（25分集中法）", content: "「25分集中＋5分休憩」を1セットにする勉強法。脳の疲労を防ぎ、高い集中力を維持できます。\n【出典: フランチェスコ・シリロ（1980年代開発）】", color: "emerald", icon: "timer" },
+            ebbinghaus: { title: "間隔反復（分散学習）", content: "記憶は翌日には7割失われます。「翌日・1週間後・1ヶ月後」に復習すると、脳が重要な情報と認識し長期記憶になります。\n【出典: ヘルマン・エビングハウス『記憶について』】", color: "blue", icon: "trending-up" },
+            active_recall: { title: "最強の記憶術「アクティブリコール」", content: "教科書をただ読むのは非効率。本を閉じ「何を学んだか」を脳内から引っ張り出す訓練で、記憶定着率が大幅に向上します。\n【出典: カーピキ＆ローディガー教授（科学誌『Science』2008）】", color: "red", icon: "book-open" },
+            feynman: { title: "理解を深める「ファインマン法」", content: "学んだことを「何も知らない小学生に教えるつもり」で声に出す方法。言葉に詰まった場所が自分の弱点だとすぐに分かります。\n【出典: リチャード・ファインマン（ノーベル物理学賞受賞者）】", color: "blue", icon: "mic" },
+            interleaving: { title: "飽きを防ぐ「インターリービング」", content: "同じ教科を連続でやるより、「数学→英語→国語」とランダムに交差（ミックス）させる方が、脳が刺激を受け長期記憶に残りやすくなります。\n【出典: ロウラー＆テイラー（『Instructional Science』2007）】", color: "emerald", icon: "shuffle" },
+            sleep_mem: { title: "寝る前15分の「睡眠暗記法」", content: "睡眠中は脳がその日に起きた情報を整理し、記憶に定着させる時間。寝る直前の15分を暗記にあてると、朝起きた時にしっかり残っています。\n【出典: マシュー・ウォーカー（UCバークレー校 神経科学者）】", color: "purple", icon: "moon" },
+            work_excite: { title: "やる気スイッチ「作業興奮」", content: "やる気は「やり始める」ことで後から湧いてきます。どうしてもやりたくない時は「とりあえず1分だけ」と決めて机に向かいましょう。\n【出典: エミール・クレペリン（精神医学者による『作業興奮』の発見）】", color: "orange", icon: "zap" },
+            chunking: { title: "魔法の数字「チャンキング」", content: "人間が一度に覚えられるのは「7±2」個まで。電話番号のように意味の塊（チャンク）に分割すると、脳のワーキングメモリを節約でき暗記がスムーズになります。\n【出典: ジョージ・ミラー（心理学者・1956年の論文より）】", color: "emerald", icon: "layers" },
+            dual_coding: { title: "文字と絵の「二重符号化」", content: "言葉だけで覚えるのではなく、「図やイラスト」とセットにして覚えることで、脳へのアクセスルートが2倍になり、思い出す確率が劇的に上がります。\n【出典: アラン・パイヴィオ（認知心理学者・1971年提唱）】", color: "orange", icon: "image" },
+            if_then: { title: "習慣化の極意「If-Thenプランニング」", content: "「もし〇〇したら、〇〇する」と事前に決める手法。「お風呂から出たら、英単語帳を開く」と決めておくと、行動の先送りを防ぐことができます。\n【出典: ピーター・ゴルヴィツァー教授（ニューヨーク大学 1999）】", color: "blue", icon: "git-commit" },
+            state_dep: { title: "本番に強くなる「状態依存記憶」", content: "記憶は「覚えた時の環境や状態」と結びつきます。テスト本番と同じように、机の上を片付け、静かな環境で時間を測って勉強すると本番で思い出しやすくなります。\n【出典: ゴデン＆バドリー（環境依存効果・1975）】", color: "purple", icon: "target" },
+            // 偉人の言葉 (4種)
+            quote_edison: { title: "偉人の言葉（トーマス・エジソン）", content: "「私たちの最大の弱点は諦めることにある。成功するための最も確実な方法は、常もう一回だけ試してみることだ。」\n【出典: トーマス・エジソン（発明家）】", color: "red", icon: "quote" },
+            quote_einstein: { title: "偉人の言葉（アルベルト・アインシュタイン）", content: "「私には特別な才能などない。ただ、ものすごく好奇心が強いだけだ。」\n才能を言い訳にせず、知ることを楽しむ姿勢が道を切り開きます。\n【出典: アルベルト・アインシュタイン（理論物理学者）】", color: "emerald", icon: "quote" },
+            quote_ford: { title: "偉人の言葉（ヘンリー・フォード）", content: "「学ぶことをやめた人は、20歳であれ80歳であれ老いている。学び続ける人は、いつまでも若い。」\n勉強は一生続く最高のエンターテイメントです。\n【出典: ヘンリー・フォード（フォード・モーター創設者）】", color: "blue", icon: "quote" },
+            quote_james: { title: "偉人の言葉（ウィリアム・ジェームズ）", content: "「あなたの行動が結果を変えるかのように行動しなさい。実際にそうなるのだから。」\n今日の1時間の努力が、明日の自分を確実に変えてくれます。\n【出典: ウィリアム・ジェームズ（心理学・哲学の父）】", color: "orange", icon: "quote" }
         };
 
         let periods = Array(8).fill('');
@@ -478,69 +491,45 @@
         let sortableInstance = null;
 
         function saveToLocal() {
-            const getV = (id) => document.getElementById(id).type === 'checkbox' ? document.getElementById(id).checked : document.getElementById(id).value;
             const data = {
                 periods, sections, calendarEvents, topicsData,
-                theme: getV('in-theme'),
-                temp: getV('in-temp'),
-                weather: getV('in-weather'),
-                periodMin: getV('in-period-min'),
-                totalPeriods: getV('in-total-periods'),
-                marquee: getV('in-marquee'),
-                fontSize: getV('in-font-size'),
-                cdEnable: getV('in-cd-enable'),
-                cdTitle: getV('in-cd-title'),
-                cdDate: getV('in-cd-date'),
-                typhoonEnable: getV('in-typhoon-enable'),
-                typhoonTitle: getV('in-typhoon-title'),
-                typhoonDesc: getV('in-typhoon-desc')
+                theme: getV('in-theme'), temp: getV('in-temp'), weather: getV('in-weather'),
+                periodMin: getV('in-period-min'), totalPeriods: getV('in-total-periods'),
+                marquee: getV('in-marquee'), fontSize: getV('in-font-size'),
+                cdEnable: getC('in-cd-enable'), cdTitle: getV('in-cd-title'), cdDate: getV('in-cd-date'),
+                typhoonEnable: getC('in-typhoon-enable'), typhoonTitle: getV('in-typhoon-title'), typhoonDesc: getV('in-typhoon-desc')
             };
-            localStorage.setItem('boardOS_v5_6_data', JSON.stringify(data));
+            localStorage.setItem('boardOS_v5_final_data', JSON.stringify(data));
         }
 
         function loadFromLocal() {
-            const saved = localStorage.getItem('boardOS_v5_6_data');
+            const saved = localStorage.getItem('boardOS_v5_final_data');
             if (saved) {
                 const data = JSON.parse(saved);
-                const setV = (id, val) => { 
-                    if(document.getElementById(id)) {
-                        if(document.getElementById(id).type === 'checkbox') document.getElementById(id).checked = val;
-                        else document.getElementById(id).value = val;
-                    }
-                };
+                const setV = (id, val) => { if($(id)) { $(id).type === 'checkbox' ? $(id).checked = val : $(id).value = val; } };
                 
                 periods = data.periods || Array(8).fill('');
                 sections = data.sections || [];
                 calendarEvents = data.calendarEvents || {};
                 topicsData = data.topicsData || { title: '', content: '', color: 'red', icon: 'lightbulb' };
                 
-                setV('in-theme', data.theme || 'white');
-                setV('in-temp', data.temp || '');
-                setV('in-weather', data.weather || 'sun');
-                setV('in-period-min', data.periodMin || '50');
-                setV('in-total-periods', data.totalPeriods || '6');
-                setV('in-marquee', data.marquee || '');
-                setV('in-font-size', data.fontSize || '32');
-                setV('in-cd-enable', data.cdEnable || false);
-                setV('in-cd-title', data.cdTitle || '定期テスト');
-                setV('in-cd-date', data.cdDate || '2026-06-26');
-                setV('in-typhoon-enable', data.typhoonEnable || false);
-                setV('in-typhoon-title', data.typhoonTitle || '台風情報');
-                setV('in-typhoon-desc', data.typhoonDesc || '');
+                setV('in-theme', data.theme || 'white'); setV('in-temp', data.temp || ''); setV('in-weather', data.weather || 'sun');
+                setV('in-period-min', data.periodMin || '50'); setV('in-total-periods', data.totalPeriods || '6');
+                setV('in-marquee', data.marquee || ''); setV('in-font-size', data.fontSize || '32');
+                setV('in-cd-enable', data.cdEnable || false); setV('in-cd-title', data.cdTitle || '定期テスト'); setV('in-cd-date', data.cdDate || '2026-06-26');
+                setV('in-typhoon-enable', data.typhoonEnable || false); setV('in-typhoon-title', data.typhoonTitle || '台風情報'); setV('in-typhoon-desc', data.typhoonDesc || '');
 
-                document.getElementById('in-topics-title').value = topicsData.title || '';
-                document.getElementById('in-topics-content').value = topicsData.content || '';
-                document.getElementById('in-topics-color').value = topicsData.color || 'red';
+                $('in-topics-title').value = topicsData.title || '';
+                $('in-topics-content').value = topicsData.content || '';
+                $('in-topics-color').value = topicsData.color || 'red';
 
-                if(document.getElementById('font-size-val')) {
-                    document.getElementById('font-size-val').innerText = (data.fontSize || 32) + 'px';
-                }
+                if($('font-size-val')) $('font-size-val').innerText = (data.fontSize || 32) + 'px';
             }
         }
 
         function clearStorage() {
             if(confirm('設定をすべてリセットしますか？')) {
-                localStorage.removeItem('boardOS_v5_6_data');
+                localStorage.removeItem('boardOS_v5_final_data');
                 location.reload();
             }
         }
@@ -548,17 +537,16 @@
         function changeMonth(dir) {
             currentCalDate.setMonth(currentCalDate.getMonth() + dir);
             generateCalendarGrid();
-            lucide.createIcons();
         }
 
         function generateCalendarGrid() {
             const year = currentCalDate.getFullYear();
             const month = currentCalDate.getMonth();
-            document.getElementById('calendar-month-label').innerText = `${year}/${String(month + 1).padStart(2, '0')}`;
+            $('calendar-month-label').innerText = `${year}/${String(month + 1).padStart(2, '0')}`;
 
             const firstDay = new Date(year, month, 1).getDay();
             const lastDate = new Date(year, month + 1, 0).getDate();
-            const container = document.getElementById('calendar-grid');
+            const container = $('calendar-grid');
             container.innerHTML = '';
 
             for (let i = 0; i < firstDay; i++) { container.innerHTML += `<div class="p-2"></div>`; }
@@ -576,45 +564,37 @@
 
                 container.innerHTML += `
                     <button onclick="selectCalendarDate('${dateStr}')" class="p-1 text-center rounded-xl border border-transparent hover:border-zinc-700 transition-all text-xs ${activeCls}">
-                        <span class="block">${day}</span>
-                        ${dotHTML}
+                        <span class="block">${day}</span>${dotHTML}
                     </button>
                 `;
             }
-            lucide.createIcons();
         }
 
         function selectCalendarDate(dateStr) {
             selectedDateStr = dateStr;
-            document.getElementById('selected-date-label').innerText = dateStr;
-            
+            $('selected-date-label').innerText = dateStr;
             const ev = calendarEvents[dateStr];
+            
             if(ev) {
-                document.getElementById('cal-subject').value = ev.subject;
-                document.getElementById('cal-title').value = ev.title;
-                document.getElementById('cal-desc').value = ev.desc;
-                document.getElementById('cal-important').checked = ev.important;
-                document.getElementById('btn-del-event').classList.remove('hidden');
+                $('cal-subject').value = ev.subject; $('cal-title').value = ev.title;
+                $('cal-desc').value = ev.desc; $('cal-important').checked = ev.important;
+                $('btn-del-event').classList.remove('hidden');
             } else {
-                document.getElementById('cal-subject').value = 'その他';
-                document.getElementById('cal-title').value = '';
-                document.getElementById('cal-desc').value = '';
-                document.getElementById('cal-important').checked = false;
-                document.getElementById('btn-del-event').classList.add('hidden');
+                $('cal-subject').value = 'その他'; $('cal-title').value = '';
+                $('cal-desc').value = ''; $('cal-important').checked = false;
+                $('btn-del-event').classList.add('hidden');
             }
             generateCalendarGrid();
         }
 
         function saveCalendarEvent() {
-            if(!selectedDateStr) { alert("日付を選択してください。"); return; }
-            const title = document.getElementById('cal-title').value.trim();
-            if(!title) { alert("タイトルを入力してください。"); return; }
+            if(!selectedDateStr) return alert("日付を選択してください。");
+            const title = $('cal-title').value.trim();
+            if(!title) return alert("タイトルを入力してください。");
 
             calendarEvents[selectedDateStr] = {
-                subject: document.getElementById('cal-subject').value,
-                title: title,
-                desc: document.getElementById('cal-desc').value.trim(),
-                important: document.getElementById('cal-important').checked
+                subject: $('cal-subject').value, title: title,
+                desc: $('cal-desc').value.trim(), important: $('cal-important').checked
             };
             selectCalendarDate(selectedDateStr);
             render();
@@ -635,47 +615,45 @@
                 const preset = topicsPresets[type];
                 topicsData = { title: preset.title, content: preset.content, color: preset.color, icon: preset.icon };
             }
-            document.getElementById('in-topics-title').value = topicsData.title;
-            document.getElementById('in-topics-content').value = topicsData.content;
-            document.getElementById('in-topics-color').value = topicsData.color;
+            $('in-topics-title').value = topicsData.title;
+            $('in-topics-content').value = topicsData.content;
+            $('in-topics-color').value = topicsData.color;
             render();
         }
 
         async function fetchAllWeatherData() {
             try {
-                const weatherRes = await fetch('https://www.jma.go.jp/bosai/forecast/data/forecast/040000.json');
-                const weatherData = await weatherRes.json();
-                const report = weatherData[0].timeSeries[0].areas[0];
-                const weatherText = report.weathers[0];
+                const res = await fetch('https://www.jma.go.jp/bosai/forecast/data/forecast/040000.json');
+                const data = await res.json();
+                const text = data[0].timeSeries[0].areas[0].weathers[0];
                 let icon = 'sun';
-                if(weatherText.includes('雷')) icon = 'cloud-lightning';
-                else if(weatherText.includes('雨')) icon = 'cloud-rain';
-                else if(weatherText.includes('雪')) icon = 'snowflake';
-                else if(weatherText.includes('曇')) icon = 'cloud';
-                document.getElementById('in-weather').value = icon;
-                document.getElementById('in-temp').value = `${weatherData[0].timeSeries[2].areas[0].temps[1]}℃`;
+                if(text.includes('雷')) icon = 'cloud-lightning';
+                else if(text.includes('雨')) icon = 'cloud-rain';
+                else if(text.includes('雪')) icon = 'snowflake';
+                else if(text.includes('曇')) icon = 'cloud';
+                $('in-weather').value = icon;
+                $('in-temp').value = `${data[0].timeSeries[2].areas[0].temps[1]}℃`;
                 render();
             } catch (e) { alert('気象データの取得に失敗しました。'); }
         }
 
         async function fetchTyphoonData() {
             try {
-                const tcRes = await fetch('https://www.jma.go.jp/bosai/typhoon/data/TC.json');
-                const tcData = await tcRes.json();
-                if (!tcData || tcData.length === 0) { alert("現在、台風情報はありません。"); return; }
-                const t = tcData[0];
-                const tName = t.typhoonName ? `台風${t.typhoonName.number}号` : '熱帯低気圧';
+                const res = await fetch('https://www.jma.go.jp/bosai/typhoon/data/TC.json');
+                const data = await res.json();
+                if (!data || data.length === 0) return alert("現在、台風情報はありません。");
+                const t = data[0];
                 let desc = `中心気圧: ${t.center?.pressure || '--'}hPa\n`;
                 if (t.wind?.average) desc += `最大風速: ${t.wind.average}m/s\n`;
-                document.getElementById('in-typhoon-title').value = tName;
-                document.getElementById('in-typhoon-desc').value = desc;
+                $('in-typhoon-title').value = t.typhoonName ? `台風${t.typhoonName.number}号` : '熱帯低気圧';
+                $('in-typhoon-desc').value = desc;
                 render();
             } catch(e) { alert('台風データの取得に失敗しました。'); }
         }
 
         function updateTimetableInputs() {
-            const count = parseInt(document.getElementById('in-total-periods').value) || 6;
-            const container = document.getElementById('timetable-inputs-container');
+            const count = parseInt($('in-total-periods').value) || 6;
+            const container = $('timetable-inputs-container');
             container.innerHTML = '';
             for(let i=0; i<count; i++) {
                 container.innerHTML += `<div class="flex items-center gap-2"><span class="text-[10px] font-bold w-4">${i+1}</span><input type="text" class="matte-input flex-1 p-3 rounded-xl font-bold text-sm" value="${periods[i] || ''}" oninput="periods[${i}]=this.value; render();"></div>`;
@@ -696,7 +674,7 @@
         }
 
         function updateSectionInputs() {
-            const container = document.getElementById('dynamic-sections');
+            const container = $('dynamic-sections');
             container.innerHTML = sections.map(s => `
                 <div class="bg-[#151515] p-5 rounded-3xl border border-[#1f1f1f] space-y-3 relative group" data-id="${s.id}">
                     <button onclick="removeSection(${s.id})" class="absolute top-4 right-4 text-slate-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
@@ -729,123 +707,94 @@
 
         function handleIconChange(id, newIcon) {
             const section = sections.find(s => s.id === id);
-            section.icon = newIcon;
-            section.title = subjectPresets[newIcon];
-            updateSectionInputs();
-            render();
+            section.icon = newIcon; section.title = subjectPresets[newIcon];
+            updateSectionInputs(); render();
         }
 
         function updateSectionData(id, key, val) {
-            const s = sections.find(x => x.id === id);
-            if(s) s[key] = val;
+            sections.find(x => x.id === id)[key] = val;
             render();
         }
 
         function formatText(text) {
             if (!text) return "";
-            return text
-                .replace(/[=＝]{2}(.+?)[=＝]{2}/g, '<mark>$1</mark>')
-                .replace(/["”](.+?)["”]/g, '<strong>$1</strong>');
+            return text.replace(/[=＝]{2}(.+?)[=＝]{2}/g, '<mark>$1</mark>').replace(/["”](.+?)["”]/g, '<strong>$1</strong>');
         }
 
-        // 🎨 メインレンダリングエンジン
+        // 🎨 軽量化済メインレンダリングエンジン
         function render() {
-            const getV = (id) => document.getElementById(id).value;
-            const getC = (id) => document.getElementById(id).checked;
-            
-            const canvas = document.getElementById('board-canvas');
             const isDark = (getV('in-theme') === 'dark');
-            if(isDark) canvas.classList.add('theme-dark');
-            else canvas.classList.remove('theme-dark');
+            isDark ? $('board-canvas').classList.add('theme-dark') : $('board-canvas').classList.remove('theme-dark');
 
-            document.getElementById('out-temp').innerText = getV('in-temp');
-            document.getElementById('out-weather-icon').innerHTML = `<i data-lucide="${getV('in-weather')}" class="w-8 h-8 text-black"></i>`;
-            document.getElementById('out-total-periods').innerText = getV('in-total-periods');
+            $('out-temp').innerText = getV('in-temp');
+            $('out-weather-icon').innerHTML = `<i data-lucide="${getV('in-weather')}" class="w-8 h-8 text-black"></i>`;
+            $('out-total-periods').innerText = getV('in-total-periods');
             
             const minV = getV('in-period-min');
-            document.getElementById('out-period-min').innerText = isNaN(minV) ? `${minV}` : `${minV}分授業`;
+            $('out-period-min').innerText = isNaN(minV) ? `${minV}` : `${minV}分授業`;
             
-            const marqueeText = getV('in-marquee');
-            const warnArea = document.getElementById('out-warn-area');
-            if(marqueeText.trim() !== "") {
-                warnArea.classList.remove('hidden'); warnArea.classList.add('flex');
-                document.getElementById('out-warn-list').innerText = marqueeText;
-            } else { warnArea.classList.add('hidden'); }
+            const marqueeText = getV('in-marquee').trim();
+            if(marqueeText) {
+                $('out-warn-area').classList.remove('hidden'); $('out-warn-area').classList.add('flex');
+                $('out-warn-list').innerText = marqueeText;
+            } else { $('out-warn-area').classList.add('hidden'); }
 
-            const cdArea = document.getElementById('out-cd-area');
             if(getC('in-cd-enable')) {
-                cdArea.classList.remove('hidden'); cdArea.classList.add('flex');
-                document.getElementById('out-cd-title').innerText = getV('in-cd-title');
+                $('out-cd-area').classList.remove('hidden'); $('out-cd-area').classList.add('flex');
+                $('out-cd-title').innerText = getV('in-cd-title');
                 const today = new Date(); today.setHours(0,0,0,0);
                 const targetDate = new Date(getV('in-cd-date')); targetDate.setHours(0,0,0,0);
                 const diffDays = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
-                const daysSpan = document.getElementById('out-cd-days');
-                if(diffDays > 0) daysSpan.innerText = diffDays;
-                else if(diffDays === 0) daysSpan.innerText = "本日";
-                else daysSpan.innerText = "終了";
-            } else { cdArea.classList.add('hidden'); }
+                $('out-cd-days').innerText = diffDays > 0 ? diffDays : (diffDays === 0 ? "本日" : "終了");
+            } else { $('out-cd-area').classList.add('hidden'); }
 
-            const typhoonArea = document.getElementById('out-typhoon-area');
             if(getC('in-typhoon-enable')) {
-                typhoonArea.classList.remove('hidden');
-                document.getElementById('out-typhoon-title').innerText = getV('in-typhoon-title');
-                document.getElementById('out-typhoon-desc').innerText = getV('in-typhoon-desc');
-            } else { typhoonArea.classList.add('hidden'); }
+                $('out-typhoon-area').classList.remove('hidden');
+                $('out-typhoon-title').innerText = getV('in-typhoon-title');
+                $('out-typhoon-desc').innerText = getV('in-typhoon-desc');
+            } else { $('out-typhoon-area').classList.add('hidden'); }
 
             const count = parseInt(getV('in-total-periods'));
-            document.getElementById('out-timetable').innerHTML = Array.from({length:count}).map((_, i) => `
+            $('out-timetable').innerHTML = Array.from({length:count}).map((_, i) => `
                 <div class="border-[3px] border-slate-900 rounded-3xl p-5 text-center bg-white shadow-sm">
                     <p class="text-[11px] font-bold text-slate-300 mb-1 uppercase tracking-widest">${i+1}</p>
                     <p class="text-4xl font-bold leading-none tracking-tighter text-slate-900">${periods[i] || '-'}</p>
                 </div>`).join('');
 
-            // 📅 【究極洗練】SaaS・タスクツールライクなモジュラーカードUIの描画
-            const timelineBar = document.getElementById('out-timeline-bar');
+            // 📅 予定ライン（本文の文字サイズ拡大 text-[14px] & タイトル text-[16px]）
             const sortedDates = Object.keys(calendarEvents).sort((a,b) => new Date(a) - new Date(b));
-            
             if(sortedDates.length === 0) {
-                timelineBar.innerHTML = `<div class="text-lg font-bold text-slate-300 italic py-4">登録された直近の予定はありません</div>`;
+                $('out-timeline-bar').innerHTML = `<div class="text-lg font-bold text-slate-300 italic py-4">登録された直近の予定はありません</div>`;
             } else {
-                timelineBar.innerHTML = sortedDates.map(dateKey => {
+                $('out-timeline-bar').innerHTML = sortedDates.map(dateKey => {
                     const e = calendarEvents[dateKey];
                     const cfg = subjectConfig[e.subject] || subjectConfig['その他'];
-                    
                     const dateObj = new Date(dateKey);
-                    const monthNum = dateObj.getMonth() + 1;
-                    const dayStr = dateObj.getDate();
-                    const dayOfWeek = ['日','月','火','水','木','金','土'][dateObj.getDay()];
                     
-                    // 重要時のスタイリング（赤い強枠 ＋ 右上の炎アイコンバッジ）
                     const borderCls = e.important ? 'border-[3px] border-red-500 shadow-[0_8px_20px_rgba(239,68,68,0.2)]' : 'border border-slate-100';
                     const importantBadge = e.important ? `<div class="absolute -top-3 -right-3 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center shadow-md"><i data-lucide="flame" class="w-4 h-4 text-white"></i></div>` : '';
-                    const tagBg = isDark ? cfg.darkBg : '';
                     const tagCls = isDark ? cfg.text : `${cfg.bg} ${cfg.text}`;
 
                     return `
                         <div class="timeline-card flex-shrink-0 w-[260px] p-5 ${borderCls}">
                             ${importantBadge}
-                            <!-- 左端アクセントライン -->
                             <div class="absolute left-0 top-0 w-1.5 h-full" style="background-color: ${cfg.color}"></div>
-                            
-                            <div class="w-full pl-2">
+                            <div class="w-full pl-2 flex flex-col justify-between">
                                 <div class="flex items-center gap-4 border-b border-slate-100 pb-3 mb-3">
-                                    <!-- 日付アイキャッチ -->
                                     <div class="flex flex-col items-center justify-center min-w-[36px]">
-                                        <span class="text-[10px] font-bold text-slate-400 leading-none">${monthNum}月</span>
-                                        <span class="text-3xl font-bold text-slate-800 leading-none mt-1 tracking-tighter">${dayStr}</span>
-                                        <span class="text-[9px] font-bold text-slate-400 leading-none mt-1">(${dayOfWeek})</span>
+                                        <span class="text-[10px] font-bold text-slate-400 leading-none">${dateObj.getMonth() + 1}月</span>
+                                        <span class="text-3xl font-bold text-slate-800 leading-none mt-1 tracking-tighter">${dateObj.getDate()}</span>
+                                        <span class="text-[9px] font-bold text-slate-400 leading-none mt-1">(${['日','月','火','水','木','金','土'][dateObj.getDay()]})</span>
                                     </div>
-                                    <!-- 縦セパレータ -->
                                     <div class="w-px h-10 bg-slate-100"></div>
-                                    <!-- タイトルとタグ -->
                                     <div class="flex-1 min-w-0">
-                                        <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold mb-1.5" style="${isDark ? `background-color: ${tagBg};` : ''}" class="${!isDark ? tagCls : cfg.text}">
+                                        <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold mb-1.5" style="${isDark ? `background-color: ${cfg.darkBg};` : ''}" class="${!isDark ? tagCls : cfg.text}">
                                             <i data-lucide="${cfg.icon}" class="w-3 h-3"></i> ${e.subject}
                                         </div>
-                                        <h4 class="text-sm font-bold text-slate-900 truncate w-full">${e.title}</h4>
+                                        <h4 class="text-[16px] font-bold text-slate-900 truncate w-full">${e.title}</h4>
                                     </div>
                                 </div>
-                                <p class="text-xs font-medium text-slate-500 line-clamp-2 leading-relaxed h-8">${e.desc || '詳細なし'}</p>
+                                <p class="text-[14px] font-bold text-slate-500 line-clamp-2 leading-snug h-10">${e.desc || '詳細なし'}</p>
                             </div>
                         </div>
                     `;
@@ -853,7 +802,6 @@
             }
 
             const fontSize = getV('in-font-size') || 32;
-            const gridContainer = document.getElementById('out-sections-grid');
             
             const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
             const tomorrowStr = tomorrow.toISOString().split('T')[0];
@@ -882,69 +830,44 @@
                     </h3>
                     <div class="space-y-6">
                         ${s.content.split('\n').filter(t => t.trim()).map(l => {
-                            if (l.startsWith('・')) {
-                                return `<div class="font-bold tracking-tight leading-[1.3] flex items-start" style="font-size: ${fontSize}px;">
-                                    <span class="mr-4 text-slate-200">・</span><span>${formatText(l.substring(1))}</span>
-                                </div>`;
-                            } else {
-                                return `<div class="font-bold tracking-tight leading-[1.3]" style="font-size: ${fontSize}px;">
-                                    ${formatText(l)}
-                                </div>`;
-                            }
+                            if (l.startsWith('・')) return `<div class="font-bold tracking-tight leading-[1.3] flex items-start" style="font-size: ${fontSize}px;"><span class="mr-4 text-slate-200">・</span><span>${formatText(l.substring(1))}</span></div>`;
+                            return `<div class="font-bold tracking-tight leading-[1.3]" style="font-size: ${fontSize}px;">${formatText(l)}</div>`;
                         }).join('') || `<div class="italic text-slate-200 font-medium" style="font-size: ${fontSize}px;">未入力</div>`}
                     </div>
                 </section>`).join('');
 
-            gridContainer.innerHTML = tomorrowHTML + normalHTML;
+            $('out-sections-grid').innerHTML = tomorrowHTML + normalHTML;
 
-            // 💡 勉強トピックス (完全Lucide化＋カラー対応)
-            const topicsArea = document.getElementById('out-topics-area');
-            const topicsTitleInput = getV('in-topics-title').trim();
-            const topicsContentInput = getV('in-topics-content').trim();
-            const selectedColorKey = getV('in-topics-color') || 'red';
+            // 💡 トピックス描画
+            const tTitle = getV('in-topics-title').trim();
+            const tContent = getV('in-topics-content').trim();
+            const colKey = getV('in-topics-color') || 'red';
             
-            if(topicsTitleInput || topicsContentInput) {
-                topicsArea.classList.remove('hidden');
+            if(tTitle || tContent) {
+                $('out-topics-area').classList.remove('hidden');
+                const col = topicsColors[colKey];
                 
-                const cardEl = document.getElementById('out-topics-card');
-                const iconBgEl = document.getElementById('out-topics-icon-bg');
-                const titleEl = document.getElementById('out-topics-title');
-                const contentEl = document.getElementById('out-topics-content');
+                $('out-topics-card').className = `w-full border-4 rounded-3xl p-7 flex flex-col relative overflow-hidden transition-all duration-300 ${col.border}`;
+                isDark ? $('out-topics-card').style.backgroundColor = col.darkBg : $('out-topics-card').classList.add(col.bg);
                 
-                const col = topicsColors[selectedColorKey];
-                const presetIcon = topicsData.icon || 'lightbulb';
+                $('out-topics-icon-bg').className = `p-2 text-white rounded-xl shadow-sm ${col.iconBg}`;
+                $('out-topics-icon-bg').innerHTML = `<i data-lucide="${topicsData.icon || 'lightbulb'}" class="w-5 h-5 text-white"></i>`;
                 
-                cardEl.className = "w-full border-4 rounded-3xl p-7 flex flex-col relative overflow-hidden transition-all duration-300";
-                iconBgEl.className = "p-2 text-white rounded-xl shadow-sm";
-                titleEl.className = "text-xl font-bold tracking-tight";
-                
-                cardEl.classList.add(col.border);
-                if(isDark) { cardEl.style.backgroundColor = col.darkBg; } 
-                else { cardEl.classList.add(col.bg); }
-                
-                iconBgEl.classList.add(col.iconBg);
-                iconBgEl.innerHTML = `<i data-lucide="${presetIcon}" class="w-5 h-5 text-white"></i>`;
-                
-                titleEl.classList.add(col.text);
+                $('out-topics-title').className = `text-xl font-bold tracking-tight ${col.text}`;
+                $('out-topics-title').innerText = tTitle || '勉強トピックス';
+                $('out-topics-content').innerText = tContent;
+            } else { $('out-topics-area').classList.add('hidden'); }
 
-                titleEl.innerText = topicsTitleInput || '勉強トピックス';
-                contentEl.innerText = topicsContentInput;
-            } else { topicsArea.classList.add('hidden'); }
-
-            document.getElementById('out-time').innerText = new Date().toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit'});
+            $('out-time').innerText = new Date().toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit'});
             
-            topicsData.title = topicsTitleInput;
-            topicsData.content = topicsContentInput;
-            topicsData.color = selectedColorKey;
-            
-            // Lucideアイコンの再描画を確実に実行
+            topicsData = { title: tTitle, content: tContent, color: colKey, icon: topicsData.icon };
             lucide.createIcons();
             saveToLocal();
         }
 
-        // 初期ロード
+        // 初期化
         const targetD = new Date();
-        document.getElementById('out-date').innerText = `${targetD.getMonth()+1}/${targetD.getDate()} (${['日','月','火','水','木','金','土'][targetD.getDay()]})`;
+        $('out-date').innerText = `${targetD.getMonth()+1}/${targetD.getDate()} (${['日','月','火','水','木','金','土'][targetD.getDay()]})`;
         
         loadFromLocal();
         generateCalendarGrid();
@@ -952,13 +875,10 @@
         updateSectionInputs();
 
         async function exportImage() {
-            const node = document.getElementById('board-canvas');
-            const now = new Date();
-            const fileName = `BoardOS_v5.6_${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}.png`;
             try {
-                const dataUrl = await htmlToImage.toPng(node, { pixelRatio: 3 });
+                const dataUrl = await htmlToImage.toPng($('board-canvas'), { pixelRatio: 3 });
                 const link = document.createElement('a');
-                link.download = fileName;
+                link.download = `BoardOS_v5_Final_${new Date().toLocaleDateString('ja-JP').replace(/\//g,'-')}.png`;
                 link.href = dataUrl;
                 link.click();
             } catch (e) { alert('画像の保存に失敗しました。'); }
