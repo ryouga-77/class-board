@@ -3,48 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学級掲示板 OS v5.0 UD PRO</title>
+    <title>学級掲示板 OS v5.2 UD PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Inter:wght@100;300;400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght=400;700&family=Inter:wght@100;400;700;900&display=swap');
         
-        :root { --bg: #050505; --card: #0d0d0d; --border: #1a1a1a; --accent: #00f0ff; }
+        :root { --bg: #080808; --card: #121212; --border: #1f1f1f; }
         body { 
-            font-family: 'BIZ UDPGothic', 'Inter', sans-serif; 
+            font-family: 'BIZ UDPGothic', sans-serif; 
             background-color: var(--bg); 
             color: #fff; 
-            letter-spacing: 0.03em;
+            letter-spacing: 0.02em;
         }
         
         .matte-input { background: var(--card); border: 1px solid var(--border); color: #fff; outline: none; transition: 0.2s; }
-        .matte-input:focus { border-color: #444; background: #121212; box-shadow: 0 0 10px rgba(255,255,255,0.05); }
+        .matte-input:focus { border-color: #555; background: #181818; }
         
+        /* v4.1のキャンバスベースデザインを復元 */
         #board-canvas { 
             width: 1080px; 
             min-height: 1080px; 
             height: auto; 
-            background: #ffffff; 
-            color: #000000; 
-            padding: 75px 85px 100px 85px; 
+            background: #fff; 
+            color: #000; 
+            padding: 75px 85px 120px 85px; 
             display: flex; 
             flex-direction: column; 
             position: relative; 
         }
 
-        /* クールデザイン: ダークテーマの再定義 */
-        #board-canvas.theme-dark { background: #050505; color: #ffffff; }
-        #board-canvas.theme-dark .text-slate-900 { color: #ffffff; }
-        #board-canvas.theme-dark .text-slate-400 { color: #888888; }
-        #board-canvas.theme-dark .text-slate-300 { color: #444444; }
-        #board-canvas.theme-dark .border-black { border-color: #ffffff; }
-        #board-canvas.theme-dark .border-slate-900 { border-color: #222222; }
-        #board-canvas.theme-dark .bg-slate-50 { background: #0d0d0d; border: 1px solid #1a1a1a; }
-        #board-canvas.theme-dark .bg-white { background: #111111; border-color: #222222; }
-        #board-canvas.theme-dark i { color: #ffffff !important; }
-        #board-canvas.theme-dark .subject-tag { color: #ffffff !important; }
+        #board-canvas.theme-dark { background: #000; color: #fff; }
+        #board-canvas.theme-dark .text-slate-900 { color: #fff; }
+        #board-canvas.theme-dark .text-slate-400 { color: #888; }
+        #board-canvas.theme-dark .text-slate-300 { color: #555; }
+        #board-canvas.theme-dark .border-black { border-color: #fff; }
+        #board-canvas.theme-dark .border-slate-900 { border-color: #fff; }
+        #board-canvas.theme-dark .bg-slate-50 { background: #111; border: 1px solid #333; }
+        #board-canvas.theme-dark .bg-white { background: #222; }
+        #board-canvas.theme-dark i { color: #fff !important; }
+        #board-canvas.theme-dark .subject-label { color: #000 !important; }
 
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         
@@ -55,42 +55,70 @@
             font-weight: 700;
         }
         #board-canvas.theme-dark mark { 
-            background: linear-gradient(transparent 50%, #cc0000 50%); 
+            background: linear-gradient(transparent 50%, #d32f2f 50%); 
             color: #fff; 
         }
         strong { 
             font-weight: 700; 
             color: #000;
-            background: rgba(0,0,0,0.05);
+            background: rgba(0,0,0,0.03);
             padding: 0 4px;
             border-radius: 4px;
         }
         #board-canvas.theme-dark strong {
             color: #fff;
-            background: rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.1);
         }
 
-        .sortable-ghost { opacity: 0.3; background-color: #1a1a1a; }
+        .sortable-ghost { opacity: 0.4; background-color: #1f1f1f; }
         .drag-handle { cursor: grab; }
         
         .bg-stripe-warning {
-            background: repeating-linear-gradient(-45deg, #e11d48, #e11d48 20px, #be123c 20px, #be123c 40px);
+            background: repeating-linear-gradient(-45deg, #dc2626, #dc2626 20px, #b91c1c 20px, #b91c1c 40px);
         }
 
-        /* 付箋（Sticky Note）のアナログ質感デザイン */
-        .sticky-note {
-            background: #fff9c4;
-            color: #332200;
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.08);
-            transform: rotate(-1.5deg);
-            transition: all 0.3s;
+        /* 📕 本のデザイン（Book Style）用の立体影と構造 */
+        .book-container {
+            position: relative;
+            background: #ffffff;
+            box-shadow: 4px 4px 10px rgba(0,0,0,0.1), inset -1px 0 3px rgba(0,0,0,0.05);
+            border-radius: 4px 12px 12px 4px;
+            transition: all 0.3s ease;
         }
-        #board-canvas.theme-dark .sticky-note {
-            background: #1e1b4b;
-            color: #e0e7ff;
-            border: 1px solid #312e81;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            transform: rotate(1deg);
+        #board-canvas.theme-dark .book-container {
+            background: #181818;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.4), inset -1px 0 3px rgba(255,255,255,0.05);
+            border: 1px solid #282828;
+            border-left: none;
+        }
+
+        /* しおり（Bookmark）の立体的なリボンデザイン */
+        .bookmark-ribbon {
+            position: absolute;
+            top: 0;
+            right: 24px;
+            width: 16px;
+            height: 36px;
+            background: #ef4444;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
+        }
+        .bookmark-ribbon::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid #ffffff;
+        }
+        #board-canvas.theme-dark .bookmark-ribbon::after {
+            border-bottom-color: #181818;
+        }
+
+        /* カレンダーセルの選択スタイリング */
+        .calendar-cell.active {
+            border: 2px solid #3b82f6 !important;
+            background-color: rgba(59, 130, 246, 0.1);
         }
     </style>
 </head>
@@ -98,29 +126,31 @@
 
     <div class="max-w-[1450px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10">
         
+        <!-- 左パネル: 各種設定項目 -->
         <div class="lg:col-span-5 space-y-6 overflow-y-auto max-h-screen pr-4 pb-20 hide-scrollbar">
-            <header class="flex justify-between items-center border-b border-[#1a1a1a] pb-4">
-                <h1 class="text-2xl font-black tracking-tighter uppercase italic">Board OS <span class="text-cyan-400">v5.0 PRO</span></h1>
-                <button onclick="fetchAllWeatherData()" class="text-[10px] font-bold bg-zinc-800 px-4 py-2 rounded-full hover:bg-zinc-700 transition-all flex items-center gap-2">
+            <header class="flex justify-between items-center border-b border-[#1f1f1f] pb-4">
+                <h1 class="text-2xl font-bold italic tracking-tighter uppercase">Board OS <span class="text-blue-500">v5.2 UD</span></h1>
+                <button onclick="fetchAllWeatherData()" class="text-[10px] font-bold bg-blue-600 px-4 py-2 rounded-full hover:bg-blue-500 transition-all flex items-center gap-2">
                     <i data-lucide="cloud-rain" class="w-3.5 h-3.5"></i> 気象取得
                 </button>
             </header>
 
-            <div class="bg-[#0d0d0d] p-6 rounded-3xl border border-[#1a1a1a] space-y-4">
-                <h3 class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-2 italic">
+            <!-- 基本設定 -->
+            <div class="bg-[#121212] p-6 rounded-3xl border border-[#1f1f1f] space-y-4">
+                <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2 italic">
                     <i data-lucide="settings" class="w-3.5 h-3.5"></i> 基本設定
                 </h3>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="text-[10px] font-bold text-zinc-500 tracking-widest ml-1 mb-1 block">テーマ</label>
-                        <select id="in-theme" class="matte-input w-full p-3 rounded-2xl font-bold text-sm" oninput="render()">
-                            <option value="white">⚪ Light Minimal</option>
-                            <option value="dark">⚫ Cyber Dark</option>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1 block">テーマ</label>
+                        <select id="in-theme" class="matte-input w-full p-3 rounded-2xl font-bold" oninput="render()">
+                            <option value="white">⚪ White</option>
+                            <option value="dark">⚫ Dark</option>
                         </select>
                     </div>
                     <div>
-                        <label class="text-[10px] font-bold text-zinc-500 tracking-widest ml-1 mb-1 block">スタイル</label>
-                        <select id="in-period-min" class="matte-input w-full p-3 rounded-2xl font-bold text-sm" oninput="render()">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1 block">スタイル</label>
+                        <select id="in-period-min" class="matte-input w-full p-3 rounded-2xl font-bold" oninput="render()">
                             <option value="50">50分授業</option>
                             <option value="45">45分授業</option>
                             <option value="B日程">B日程</option>
@@ -129,8 +159,8 @@
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="text-[10px] font-bold text-zinc-500 tracking-widest ml-1 mb-1 block">天気</label>
-                        <select id="in-weather" class="matte-input w-full p-3 rounded-2xl font-bold text-sm" oninput="render()">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1 block">天気</label>
+                        <select id="in-weather" class="matte-input w-full p-3 rounded-2xl font-bold" oninput="render()">
                             <option value="sun">☀️ 晴れ</option>
                             <option value="cloud">☁️ 曇り</option>
                             <option value="cloud-rain">☔ 雨</option>
@@ -139,33 +169,50 @@
                         </select>
                     </div>
                     <div>
-                        <label class="text-[10px] font-bold text-zinc-500 tracking-widest ml-1 mb-1 block">気温</label>
-                        <input type="text" id="in-temp" class="matte-input w-full p-3 rounded-2xl font-bold text-center text-sm" placeholder="--℃" oninput="render()">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1 block">気温</label>
+                        <input type="text" id="in-temp" class="matte-input w-full p-3 rounded-2xl font-bold text-center" placeholder="--℃" oninput="render()">
                     </div>
                 </div>
                 <div>
-                    <label class="flex justify-between text-[10px] font-bold text-zinc-500 tracking-widest ml-1 mb-1">
-                        <span>本文文字サイズ</span>
+                    <label class="flex justify-between text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1">
+                        <span>本文の文字サイズ</span>
                         <span id="font-size-val">32px</span>
                     </label>
-                    <input type="range" id="in-font-size" class="w-full accent-cyan-400" min="20" max="48" value="32" oninput="document.getElementById('font-size-val').innerText = this.value + 'px'; render();">
+                    <input type="range" id="in-font-size" class="w-full accent-blue-500" min="20" max="48" value="32" oninput="document.getElementById('font-size-val').innerText = this.value + 'px'; render();">
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold text-rose-500 tracking-widest ml-1 mb-1 block">緊急連絡（テロップ）</label>
-                    <input type="text" id="in-marquee" class="matte-input w-full p-3 rounded-2xl font-bold border-rose-950/40 text-sm" placeholder="流したい文字を入力" oninput="render()">
+                    <label class="text-[10px] font-bold text-red-500 uppercase tracking-widest ml-1 mb-1 block">緊急連絡（テロップ）</label>
+                    <input type="text" id="in-marquee" class="matte-input w-full p-3 rounded-2xl font-bold border-red-900/30" placeholder="流したい文字を入力" oninput="render()">
                 </div>
             </div>
 
-            <div class="bg-[#0d0d0d] p-6 rounded-3xl border border-cyan-950/30 space-y-4">
-                <h3 class="text-[10px] font-bold text-cyan-400 uppercase tracking-[0.2em] flex items-center gap-2 italic">
-                    <i data-lucide="calendar" class="w-3.5 h-3.5"></i> カレンダー予定管理 (下部バー & 前日連動)
-                </h3>
-                <div class="space-y-2 max-h-[200px] overflow-y-auto pr-1 hide-scrollbar" id="calendar-list">
+            <!-- 📅 【新機能】月カレンダーコントロールUI -->
+            <div class="bg-[#121212] p-6 rounded-3xl border border-blue-900/30 space-y-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] flex items-center gap-2 italic">
+                        <i data-lucide="calendar" class="w-3.5 h-3.5"></i> 月間カレンダーマネージャー
+                    </h3>
+                    <div class="flex gap-2 text-xs font-mono font-bold">
+                        <button onclick="changeMonth(-1)" class="text-slate-400 hover:text-white">◀</button>
+                        <span id="calendar-month-label">2026/06</span>
+                        <button onclick="changeMonth(1)" class="text-slate-400 hover:text-white">▶</button>
                     </div>
-                <div class="bg-[#121212] p-4 rounded-2xl border border-[#1a1a1a] space-y-3">
-                    <p class="text-[10px] font-bold text-zinc-400">📅 新しい予定を追加</p>
+                </div>
+                
+                <!-- 動的カレンダーグリッド -->
+                <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-400 border-b border-zinc-800 pb-1">
+                    <div class="text-red-400">日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div class="text-blue-400">土</div>
+                </div>
+                <div id="calendar-grid" class="grid grid-cols-7 gap-1"></div>
+
+                <!-- 予定入力フォーム -->
+                <div class="bg-[#181818] p-4 rounded-2xl border border-zinc-800 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <p class="text-[10px] font-bold text-blue-400">選択日: <span id="selected-date-label" class="font-mono text-white">日付を選択してください</span></p>
+                        <button onclick="deleteSelectedEvent()" id="btn-del-event" class="hidden text-[10px] text-red-400 hover:underline">この日の予定を削除</button>
+                    </div>
+                    
                     <div class="grid grid-cols-2 gap-2">
-                        <input type="date" id="cal-date" class="matte-input p-2 rounded-xl text-xs font-bold">
                         <select id="cal-subject" class="matte-input p-2 rounded-xl text-xs font-bold">
                             <option value="国語">国語</option>
                             <option value="数学">数学</option>
@@ -174,81 +221,69 @@
                             <option value="社会">社会</option>
                             <option value="その他" selected>その他</option>
                         </select>
-                    </div>
-                    <input type="text" id="cal-title" class="matte-input w-full p-2 rounded-xl text-xs font-bold" placeholder="タイトル（例: 漢字テスト）">
-                    <textarea id="cal-desc" class="matte-input w-full p-2 rounded-xl text-xs" rows="2" placeholder="詳細（例: ワークP.12まで）"></textarea>
-                    <div class="flex justify-between items-center pt-1">
-                        <label class="flex items-center gap-2 text-xs text-zinc-400 cursor-pointer">
-                            <input type="checkbox" id="cal-important" class="accent-rose-500"> ⚠️ 重要タグ（赤枠強調）
+                        <label class="flex items-center gap-1.5 text-[11px] text-slate-400 cursor-pointer">
+                            <input type="checkbox" id="cal-important" class="accent-red-500"> 🔖 重要(赤しおり)
                         </label>
-                        <button onclick="addCalendarEvent()" class="bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all">追加</button>
                     </div>
+                    <input type="text" id="cal-title" class="matte-input w-full p-2.5 rounded-xl text-xs font-bold" placeholder="タイトル（例: 単元テスト）">
+                    <textarea id="cal-desc" class="matte-input w-full p-2.5 rounded-xl text-xs" rows="2" placeholder="詳細内容（例: 教科書P.34〜P.39）"></textarea>
+                    <button onclick="saveCalendarEvent()" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl transition-colors">カレンダーに保存</button>
                 </div>
             </div>
 
-            <div class="bg-[#0d0d0d] p-6 rounded-3xl border border-indigo-950/30 space-y-4">
+            <!-- カウントダウン -->
+            <div class="bg-[#121212] p-6 rounded-3xl border border-indigo-900/30 space-y-4">
                 <div class="flex justify-between items-center">
                     <h3 class="text-[10px] font-bold text-indigo-400 uppercase tracking-[0.2em] flex items-center gap-2 italic">
                         <i data-lucide="timer" class="w-3.5 h-3.5"></i> カウントダウン
                     </h3>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="in-cd-enable" class="sr-only peer" onchange="render()">
-                        <div class="w-9 h-5 bg-zinc-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                        <div class="w-9 h-5 bg-gray-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
                     </label>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="text-[10px] font-bold text-zinc-500 ml-1 mb-1 block">イベント名</label>
+                        <label class="text-[10px] font-bold text-slate-500 ml-1 mb-1 block">イベント名</label>
                         <input type="text" id="in-cd-title" class="matte-input w-full p-3 rounded-xl font-bold text-sm" value="定期テスト">
                     </div>
                     <div>
-                        <label class="text-[10px] font-bold text-zinc-500 ml-1 mb-1 block">目標日</label>
+                        <label class="text-[10px] font-bold text-slate-500 ml-1 mb-1 block">目標日</label>
                         <input type="date" id="in-cd-date" class="matte-input w-full p-3 rounded-xl font-bold text-sm" value="2026-06-26">
                     </div>
                 </div>
             </div>
 
-            <div class="bg-[#0d0d0d] p-6 rounded-3xl border border-rose-950/30 space-y-4">
+            <!-- 台風・防災情報 -->
+            <div class="bg-[#121212] p-6 rounded-3xl border border-red-900/50 space-y-4">
                 <div class="flex justify-between items-center">
-                    <h3 class="text-[10px] font-bold text-rose-400 uppercase tracking-[0.2em] flex items-center gap-2 italic">
+                    <h3 class="text-[10px] font-bold text-red-400 uppercase tracking-[0.2em] flex items-center gap-2 italic">
                         <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> 台風・防災情報
                     </h3>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="in-typhoon-enable" class="sr-only peer" onchange="render()">
-                        <div class="w-9 h-5 bg-zinc-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-600"></div>
+                        <div class="w-9 h-5 bg-gray-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-600"></div>
                     </label>
                 </div>
                 <div class="space-y-3">
                     <div class="flex gap-2">
                         <input type="text" id="in-typhoon-title" class="matte-input flex-1 p-3 rounded-xl font-bold text-sm" value="台風情報">
-                        <button onclick="fetchTyphoonData()" class="px-3 bg-rose-950/40 text-rose-400 rounded-xl text-[10px] font-bold hover:bg-rose-900/60 transition-colors">JSON取得</button>
+                        <button onclick="fetchTyphoonData()" class="px-3 bg-red-900/40 text-red-400 rounded-xl text-[10px] font-bold hover:bg-red-900/60 transition-colors">JSON取得</button>
                     </div>
-                    <select id="in-typhoon-level" class="matte-input w-full p-3 rounded-xl font-bold text-sm text-rose-300" oninput="render()">
+                    <select id="in-typhoon-level" class="matte-input w-full p-3 rounded-xl font-bold text-sm text-red-300" oninput="render()">
                         <option value="警戒レベル不要">レベル非表示</option>
                         <option value="警戒レベル3（高齢者等避難）">警戒レベル3（高齢者等避難）</option>
                         <option value="警戒レベル4（全員避難）">警戒レベル4（全員避難）</option>
                         <option value="警戒レベル5（緊急安全確保）">警戒レベル5（緊急安全確保）</option>
                     </select>
-                    <textarea id="in-typhoon-desc" class="matte-input w-full p-3 rounded-xl font-bold text-xs" rows="2" oninput="render()">本日は大雨が予想されるため、部活動は全て中止です。</textarea>
+                    <textarea id="in-typhoon-desc" class="matte-input w-full p-3 rounded-xl font-bold text-xs" rows="2" oninput="render()">本日は大雨・暴風が予想されるため、部活動は全て中止です。</textarea>
                 </div>
             </div>
 
-            <div class="bg-[#0d0d0d] p-6 rounded-3xl border border-amber-950/30 space-y-4">
-                <h3 class="text-[10px] font-bold text-amber-400 uppercase tracking-[0.2em] flex items-center gap-2 italic">
-                    <i data-lucide="sticky-note" class="w-3.5 h-3.5"></i> 学習Tipsトピックス（付箋デザイン）
-                </h3>
-                <div class="flex gap-1.5 flex-wrap">
-                    <button onclick="applyTipsPreset('pomodoro')" class="text-[10px] bg-zinc-800 px-2 py-1 rounded-lg hover:bg-zinc-700">⏱️ ポモドーロ</button>
-                    <button onclick="applyTipsPreset('ebbinghaus')" class="text-[10px] bg-zinc-800 px-2 py-1 rounded-lg hover:bg-zinc-700">📈 復習タイミング</button>
-                    <button onclick="applyTipsPreset('clear')" class="text-[10px] bg-rose-950 text-rose-300 px-2 py-1 rounded-lg">Clear</button>
-                </div>
-                <input type="text" id="in-tips-title" class="matte-input w-full p-3 rounded-xl font-bold text-sm" placeholder="Tips タイトル" oninput="render()">
-                <textarea id="in-tips-content" class="matte-input w-full p-3 rounded-xl text-xs" rows="3" placeholder="付箋に表示するお役立ちテクニックやおすすめの勉強法を入力" oninput="render()"></textarea>
-            </div>
-
-            <div class="bg-[#0d0d0d] p-6 rounded-3xl border border-[#1a1a1a] space-y-4">
+            <!-- 時間割 -->
+            <div class="bg-[#121212] p-6 rounded-3xl border border-[#1f1f1f] space-y-4">
                 <div class="flex justify-between items-center">
-                    <h3 class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-2 italic">
+                    <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2 italic">
                         <i data-lucide="grid" class="w-3.5 h-3.5"></i> 時間割
                     </h3>
                     <input type="number" id="in-total-periods" class="matte-input w-16 p-1 rounded-lg text-center text-xs" value="6" min="1" max="8" oninput="updateTimetableInputs()">
@@ -256,102 +291,103 @@
                 <div id="timetable-inputs-container" class="grid grid-cols-2 gap-3"></div>
             </div>
 
+            <!-- 掲示項目 -->
             <div class="space-y-4">
-                <h3 class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-2 italic ml-2">
-                    <i data-lucide="layout-list" class="w-3.5 h-3.5"></i> 掲示項目 (ドラッグ並び替え)
+                <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2 italic ml-2">
+                    <i data-lucide="layout-list" class="w-3.5 h-3.5"></i> 掲示項目 (ドラッグで並び替え)
                 </h3>
                 <div id="dynamic-sections" class="space-y-4"></div>
-                <button onclick="addSection()" class="w-full py-4 border-2 border-dashed border-zinc-800 rounded-2xl text-zinc-500 font-bold hover:border-zinc-600 hover:text-zinc-400 transition-all flex items-center justify-center gap-2">
+                <button onclick="addSection()" class="w-full py-4 border-2 border-dashed border-[#222] rounded-2xl text-slate-500 font-bold hover:border-slate-400 hover:text-slate-300 transition-all flex items-center justify-center gap-2">
                     <i data-lucide="plus" class="w-5 h-5"></i> 項目を追加
                 </button>
             </div>
 
-            <div class="pt-6 border-t border-[#1a1a1a] space-y-3">
-                <button onclick="exportImage()" class="w-full py-6 bg-white text-black font-black rounded-3xl shadow-2xl transition-all text-sm tracking-[0.2em] uppercase hover:bg-zinc-200 flex items-center justify-center gap-2">
+            <div class="pt-6 border-t border-[#1f1f1f] space-y-3">
+                <button onclick="exportImage()" class="w-full py-6 bg-white text-black font-bold rounded-3xl shadow-2xl transition-all text-sm tracking-[0.2em] uppercase hover:bg-slate-200 flex items-center justify-center gap-2">
                     <i data-lucide="send" class="w-5 h-5"></i> 画像を保存して送信
                 </button>
-                <button onclick="clearStorage()" class="w-full py-2 text-[10px] text-zinc-700 hover:text-rose-500 transition-colors uppercase tracking-widest">
+                <button onclick="clearStorage()" class="w-full py-2 text-[10px] text-slate-700 hover:text-red-500 transition-colors uppercase tracking-widest">
                     設定をリセット
                 </button>
             </div>
         </div>
 
+        <!-- 右パネル: 出力グラフィックキャンバス (1080x1080ベース) -->
         <div class="lg:col-span-7 flex flex-col items-center">
-            <div style="transform: scale(0.45); transform-origin: top center;">
-                <div id="board-canvas" class="shadow-[0_50px_100px_rgba(0,0,0,0.6)]">
+            <div style="transform: scale(0.44); transform-origin: top center;">
+                <div id="board-canvas" class="shadow-[0_50px_100px_rgba(0,0,0,0.3)]">
                     
+                    <!-- ヘッダー -->
                     <header class="flex justify-between items-start border-b-[16px] border-black pb-10 relative">
                         <div>
-                            <div class="text-[14px] font-bold tracking-[0.5em] text-zinc-400 mb-2 uppercase italic font-mono">Daily Dashboard / System v5.0</div>
-                            <h2 class="text-7xl font-black tracking-tight text-slate-900 leading-none">事務連絡</h2>
+                            <div class="text-[15px] font-bold tracking-[0.5em] text-slate-300 mb-2 uppercase italic">Daily Briefing / Murata-Cho</div>
+                            <h2 class="text-7xl font-light tracking-[0.02em] text-slate-900 leading-none">事務連絡</h2>
                         </div>
                         
-                        <div id="out-cd-area" class="absolute left-1/2 -translate-x-1/2 top-0 hidden flex-col items-center justify-center bg-indigo-50/80 border-2 border-indigo-100 px-6 py-3 rounded-2xl">
+                        <div id="out-cd-area" class="absolute left-1/2 -translate-x-1/2 top-0 hidden flex-col items-center justify-center bg-indigo-50 border-2 border-indigo-200 px-6 py-3 rounded-2xl">
                             <p id="out-cd-title" class="text-xs font-bold text-indigo-500 tracking-widest uppercase mb-1">--</p>
-                            <p class="text-indigo-900 font-bold text-3xl tracking-tighter">あと <span id="out-cd-days" class="text-5xl text-indigo-600 px-1 font-black">--</span> 日</p>
+                            <p class="text-indigo-900 font-bold text-3xl tracking-tighter">あと <span id="out-cd-days" class="text-5xl text-indigo-600 px-1">--</span> 日</p>
                         </div>
 
                         <div class="text-right">
-                            <p id="out-date" class="text-5xl font-black tracking-tighter mb-2 italic font-mono">--/-- (--)</p>
+                            <p id="out-date" class="text-5xl font-bold tracking-tighter mb-2 italic">--/-- (--)</p>
                             <div class="flex flex-col items-end gap-1">
-                                <div id="out-weather-icon" class="bg-transparent p-1"></div>
-                                <p id="out-temp" class="text-2xl font-bold text-slate-400 italic font-mono">--℃</p>
+                                <div id="out-weather-icon" class="bg-white p-1 mb-1 rounded-sm shadow-sm"></div>
+                                <p id="out-temp" class="text-2xl font-medium text-slate-400 italic">--℃</p>
                             </div>
                         </div>
                     </header>
 
-                    <div id="out-typhoon-area" class="hidden mt-8 bg-stripe-warning rounded-3xl p-1.5 shadow-2xl">
-                        <div class="bg-white/95 rounded-2xl p-8 flex flex-col border-4 border-rose-600 relative overflow-hidden">
+                    <!-- 防災情報 -->
+                    <div id="out-typhoon-area" class="hidden mt-10 bg-stripe-warning rounded-3xl p-2 shadow-2xl">
+                        <div class="bg-white/95 rounded-2xl p-8 flex flex-col border-4 border-red-600 relative overflow-hidden">
                             <div class="flex items-center gap-4 mb-4">
-                                <div class="bg-rose-600 p-3 rounded-full animate-pulse">
+                                <div class="bg-red-600 p-3 rounded-full animate-pulse">
                                     <i data-lucide="alert-triangle" class="w-8 h-8 text-white"></i>
                                 </div>
                                 <div>
-                                    <h3 id="out-typhoon-title" class="text-4xl font-black text-rose-700 tracking-tight">台風情報</h3>
-                                    <p id="out-typhoon-level" class="text-lg font-bold text-rose-500 tracking-widest mt-1">警戒レベル</p>
+                                    <h3 id="out-typhoon-title" class="text-4xl font-black text-red-700 tracking-tight">台風情報</h3>
+                                    <p id="out-typhoon-level" class="text-lg font-bold text-red-500 tracking-widest mt-1">警戒レベル</p>
                                 </div>
                             </div>
                             <p id="out-typhoon-desc" class="text-2xl font-bold text-slate-800 leading-relaxed whitespace-pre-wrap">--</p>
                         </div>
                     </div>
 
-                    <div class="mt-8 flex gap-4 h-[88px]">
-                        <div class="bg-slate-50 px-8 py-5 rounded-3xl flex items-center gap-4 border border-zinc-100">
+                    <!-- サブテロップ -->
+                    <div class="mt-10 flex gap-4 h-[88px]">
+                        <div class="bg-slate-50 px-8 py-5 rounded-3xl flex items-center gap-4">
                             <i data-lucide="clock" class="w-7 h-7 text-slate-900"></i>
-                            <p class="text-2xl font-black text-slate-900 font-mono"><span id="out-total-periods">6</span>時間 <span class="mx-3 opacity-20">|</span> <span id="out-period-min">50</span></p>
+                            <p class="text-2xl font-bold text-slate-900"><span id="out-total-periods">6</span>時間 <span class="mx-3 opacity-20">|</span> <span id="out-period-min">50</span></p>
                         </div>
-                        <div id="out-warn-area" class="flex-1 bg-rose-600 text-white px-8 py-5 rounded-3xl hidden items-center overflow-hidden">
+                        <div id="out-warn-area" class="flex-1 bg-red-600 text-white px-8 py-5 rounded-3xl hidden items-center overflow-hidden">
                             <marquee id="out-warn-list" scrollamount="12" class="text-3xl font-bold italic uppercase"></marquee>
                         </div>
                     </div>
 
-                    <div class="mt-10 mb-4 flex items-baseline gap-4">
-                        <h3 class="text-2xl font-black tracking-tight text-slate-900">次回の時間割</h3>
-                        <span class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400 italic font-mono">Time Schedule</span>
+                    <!-- 時間割表示 -->
+                    <div class="mt-12 mb-4 flex items-baseline gap-4">
+                        <h3 class="text-2xl font-bold tracking-tight text-slate-900">次回の時間割</h3>
+                        <span class="text-xs font-bold uppercase tracking-[0.3em] text-slate-300 italic">TimeSchedule</span>
                     </div>
                     <div class="grid grid-cols-6 gap-5" id="out-timetable"></div>
 
-                    <div class="mt-10 mb-4 flex items-baseline gap-4">
-                        <h3 class="text-2xl font-black tracking-tight text-slate-900">今後の予定ライン</h3>
-                        <span class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400 italic font-mono">Calendar Timeline</span>
+                    <!-- 📕 【アップデート】今後の予定ライン（本のデザイン構造） -->
+                    <div class="mt-12 mb-4 flex items-baseline gap-4">
+                        <h3 class="text-2xl font-bold tracking-tight text-slate-900">今後の予定ライン</h3>
+                        <span class="text-xs font-bold uppercase tracking-[0.3em] text-slate-300 italic">Book Rack Timeline</span>
                     </div>
-                    <div id="out-timeline-bar" class="flex gap-4 overflow-x-auto pb-2 tracking-tight">
-                        </div>
-
-                    <div id="out-sections-grid" class="grid grid-cols-2 gap-x-14 gap-y-10 mt-10 flex-1 items-start content-start">
-                        </div>
-
-                    <div id="out-tips-area" class="mt-8 hidden justify-end">
-                        <div class="sticky-note w-[450px] p-6 rounded-2xl relative border border-amber-200/50">
-                            <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-white/40 w-24 h-6 shadow-sm border border-black/5 rounded-sm opacity-60"></div>
-                            <h4 id="out-tips-title" class="text-lg font-black tracking-tight mb-2 flex items-center gap-2">💡 Tips</h4>
-                            <p id="out-tips-content" class="text-sm font-bold leading-relaxed whitespace-pre-wrap opacity-90"></p>
-                        </div>
+                    <div id="out-timeline-bar" class="flex gap-6 overflow-x-auto py-3 px-2 tracking-tight hide-scrollbar">
+                        <!-- ここに本のデザインのカードが動的に並びます -->
                     </div>
 
-                    <footer class="mt-12 border-t border-slate-100 pt-8 flex justify-between items-baseline italic">
-                        <div class="text-[12px] font-bold tracking-[0.5em] text-zinc-300 uppercase font-mono">Board Design OS 5.0 PRO</div>
-                        <div id="out-time" class="text-6xl font-black tracking-tighter font-mono text-slate-900">00:00</div>
+                    <!-- メイン通常掲示エリア + 前日自動連動ボックス -->
+                    <div id="out-sections-grid" class="grid grid-cols-2 gap-x-16 gap-y-14 mt-12 flex-1 items-start content-start"></div>
+
+                    <!-- フッター -->
+                    <footer class="mt-20 border-t border-slate-100 pt-10 flex justify-between items-baseline italic">
+                        <div class="text-[12px] font-bold tracking-[0.5em] text-slate-200 uppercase">Board Design OS 5.2 UD PRO</div>
+                        <div id="out-time" class="text-6xl font-bold tracking-tighter font-mono text-slate-900">00:00</div>
                     </footer>
                 </div>
             </div>
@@ -366,30 +402,19 @@
         };
 
         const iconLabels = {
-            'pencil': '鉛筆', 'megaphone': '連絡', 'book': '国語', 'calculator': '数学',
+            'pencil': '連絡', 'megaphone': '告知', 'book': '国語', 'calculator': '数学',
             'microscope': '理科', 'languages': '英語', 'map': '社会', 'music': '音楽',
             'palette': '美術', 'dumbbell': '体育', 'alert-circle': '重要', 'shopping-bag': '持物'
         };
 
-        // 教科ごとのカラーマップ定義
-        const subjectColors = {
-            '国語': { bg: 'bg-rose-500/10', border: 'border-rose-500/30', text: 'text-rose-500', hex: '#f43f5e' },
-            '数学': { bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-500', hex: '#3b82f6' },
-            '英語': { bg: 'bg-orange-500/10', border: 'border-orange-500/30', text: 'text-orange-500', hex: '#f97316' },
-            '理科': { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-500', hex: '#10b981' },
-            '社会': { bg: 'bg-amber-500/10', border: 'border-amber-500/30', text: 'text-amber-500', hex: '#f59e0b' },
-            'その他': { bg: 'bg-zinc-500/10', border: 'border-zinc-500/30', text: 'text-zinc-500', hex: '#71717a' }
-        };
-
-        const tipsPresets = {
-            pomodoro: {
-                title: "⏱️ ポモドーロ・テクニック",
-                content: "「25分集中＋5分休憩」を1セットにする勉強法。タイマーをセットするだけで、驚くほど集中力が持続します。ゲーム感覚でセット数をこなそう！"
-            },
-            ebbinghaus: {
-                title: "📈 科学的な復習タイミング",
-                content: "人の脳は1日後に74%忘れます。覚えた「その日の夜」「翌朝」「1週間後」の3回、1回たった5分の解き直しをするだけで記憶に完全定着します！"
-            }
+        // 本の背表紙カラー＆ドット定義
+        const subjectStyles = {
+            '国語': { spine: '#ef4444', text: 'text-red-500', bg: 'rgba(239,68,68,0.04)' },
+            '数学': { spine: '#3b82f6', text: 'text-blue-500', bg: 'rgba(59,130,246,0.04)' },
+            '英語': { spine: '#f97316', text: 'text-orange-500', bg: 'rgba(249,115,22,0.04)' },
+            '理科': { spine: '#10b981', text: 'text-emerald-500', bg: 'rgba(16,185,129,0.04)' },
+            '社会': { spine: '#eab308', text: 'text-yellow-600', bg: 'rgba(234,179,8,0.04)' },
+            'その他': { spine: '#64748b', text: 'text-slate-500', bg: 'rgba(100,116,139,0.04)' }
         };
 
         let periods = Array(8).fill('');
@@ -397,14 +422,18 @@
             { id: 1, title: '宿題・自学', icon: 'pencil', content: '', width: 'half' },
             { id: 2, title: '事務連絡', icon: 'megaphone', content: '', width: 'half' }
         ];
-        let calendarEvents = [];
-        let tipsData = { title: '', content: '' };
-        let sortableInstance = null;
+        
+        // カレンダー予定データ構造（Key: YYYY-MM-DD）
+        let calendarEvents = {};
+        
+        // カレンダーの現在の表示年月設定
+        let currentCalDate = new Date();
+        let selectedDateStr = "";
 
         function saveToLocal() {
             const getV = (id) => document.getElementById(id).type === 'checkbox' ? document.getElementById(id).checked : document.getElementById(id).value;
             const data = {
-                periods, sections, calendarEvents, tipsData,
+                periods, sections, calendarEvents,
                 theme: getV('in-theme'),
                 temp: getV('in-temp'),
                 weather: getV('in-weather'),
@@ -420,11 +449,11 @@
                 typhoonLevel: getV('in-typhoon-level'),
                 typhoonDesc: getV('in-typhoon-desc')
             };
-            localStorage.setItem('boardOS_v5_data', JSON.stringify(data));
+            localStorage.setItem('boardOS_v5_calendar_data', JSON.stringify(data));
         }
 
         function loadFromLocal() {
-            const saved = localStorage.getItem('boardOS_v5_data');
+            const saved = localStorage.getItem('boardOS_v5_calendar_data');
             if (saved) {
                 const data = JSON.parse(saved);
                 const setV = (id, val) => { 
@@ -436,8 +465,7 @@
                 
                 periods = data.periods || Array(8).fill('');
                 sections = data.sections || [];
-                calendarEvents = data.calendarEvents || [];
-                tipsData = data.tipsData || { title: '', content: '' };
+                calendarEvents = data.calendarEvents || {};
                 
                 setV('in-theme', data.theme || 'white');
                 setV('in-temp', data.temp || '');
@@ -454,9 +482,6 @@
                 setV('in-typhoon-level', data.typhoonLevel || '警戒レベル不要');
                 setV('in-typhoon-desc', data.typhoonDesc || '');
 
-                setV('in-tips-title', tipsData.title || '');
-                setV('in-tips-content', tipsData.content || '');
-                
                 if(document.getElementById('font-size-val')) {
                     document.getElementById('font-size-val').innerText = (data.fontSize || 32) + 'px';
                 }
@@ -465,70 +490,104 @@
 
         function clearStorage() {
             if(confirm('設定をすべてリセットしますか？')) {
-                localStorage.removeItem('boardOS_v5_data');
+                localStorage.removeItem('boardOS_v5_calendar_data');
                 location.reload();
             }
         }
 
-        // カレンダーロジック
-        function addCalendarEvent() {
-            const date = document.getElementById('cal-date').value;
-            const subject = document.getElementById('cal-subject').value;
-            const title = document.getElementById('cal-title').value.trim();
-            const desc = document.getElementById('cal-desc').value.trim();
-            const important = document.getElementById('cal-important').checked;
+        // 📅 マンスリーカレンダーUIエンジン
+        function changeMonth(dir) {
+            currentCalDate.setMonth(currentCalDate.getMonth() + dir);
+            generateCalendarGrid();
+        }
 
-            if(!date || !title) {
-                alert("日付とタイトルは必須です。");
-                return;
+        function generateCalendarGrid() {
+            const year = currentCalDate.getFullYear();
+            const month = currentCalDate.getMonth();
+            document.getElementById('calendar-month-label').innerText = `${year}/${String(month + 1).padStart(2, '0')}`;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const lastDate = new Date(year, month + 1, 0).getDate();
+
+            const container = document.getElementById('calendar-grid');
+            container.innerHTML = '';
+
+            // 空白セル
+            for (let i = 0; i < firstDay; i++) {
+                container.innerHTML += `<div class="p-2"></div>`;
             }
 
-            calendarEvents.push({ id: Date.now(), date, subject, title, desc, important });
-            // 日付順にソート
-            calendarEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+            // 日付セル生成
+            for (let day = 1; day <= lastDate; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const hasEvent = calendarEvents[dateStr];
+                const activeCls = (dateStr === selectedDateStr) ? 'calendar-cell active' : '';
+                
+                // 予定に応じた色ドットの配置
+                let dotHTML = '<div class="h-1 w-1 mt-0.5 mx-auto rounded-full bg-transparent"></div>';
+                if(hasEvent) {
+                    const style = subjectStyles[hasEvent.subject] || subjectStyles['その他'];
+                    dotHTML = `<div class="h-1 w-1 mt-0.5 mx-auto rounded-full" style="background-color: ${style.spine}"></div>`;
+                }
 
-            document.getElementById('cal-title').value = '';
-            document.getElementById('cal-desc').value = '';
-            document.getElementById('cal-important').checked = false;
-
-            updateCalendarControlList();
-            render();
-        }
-
-        function deleteCalendarEvent(id) {
-            calendarEvents = calendarEvents.filter(e => e.id !== id);
-            updateCalendarControlList();
-            render();
-        }
-
-        function updateCalendarControlList() {
-            const container = document.getElementById('calendar-list');
-            if(calendarEvents.length === 0) {
-                container.innerHTML = `<p class="text-xs text-zinc-600 italic p-2">登録された予定はありません</p>`;
-                return;
+                container.innerHTML += `
+                    <button onclick="selectCalendarDate('${dateStr}')" class="p-1 text-center rounded-xl border border-transparent hover:border-zinc-700 transition-all font-mono text-xs ${activeCls}">
+                        <span class="block">${day}</span>
+                        ${dotHTML}
+                    </button>
+                `;
             }
-            container.innerHTML = calendarEvents.map(e => `
-                <div class="flex items-center justify-between bg-[#121212] p-2 rounded-xl border border-zinc-800 text-xs">
-                    <div class="truncate mr-2">
-                        <span class="font-mono text-zinc-500">${e.date.substring(5)}</span>
-                        <span class="ml-1 px-1.5 py-0.5 rounded text-[10px] bg-zinc-800 font-bold">${e.subject}</span>
-                        <span class="ml-1 font-bold ${e.important ? 'text-rose-400':''}">${e.title}</span>
-                    </div>
-                    <button onclick="deleteCalendarEvent(${e.id})" class="text-zinc-600 hover:text-rose-400 p-1">×</button>
-                </div>
-            `).join('');
         }
 
-        // Tipsプリセット
-        function applyTipsPreset(type) {
-            if(type === 'clear') {
-                tipsData = { title: '', content: '' };
+        function selectCalendarDate(dateStr) {
+            selectedDateStr = dateStr;
+            document.getElementById('selected-date-label').innerText = dateStr;
+            
+            const ev = calendarEvents[dateStr];
+            if(ev) {
+                document.getElementById('cal-subject').value = ev.subject;
+                document.getElementById('cal-title').value = ev.title;
+                document.getElementById('cal-desc').value = ev.desc;
+                document.getElementById('cal-important').checked = ev.important;
+                document.getElementById('btn-del-event').classList.remove('hidden');
             } else {
-                tipsData = { title: tipsPresets[type].title, content: tipsPresets[type].content };
+                document.getElementById('cal-subject').value = 'その他';
+                document.getElementById('cal-title').value = '';
+                document.getElementById('cal-desc').value = '';
+                document.getElementById('cal-important').checked = false;
+                document.getElementById('btn-del-event').classList.add('hidden');
             }
-            document.getElementById('in-tips-title').value = tipsData.title;
-            document.getElementById('in-tips-content').value = tipsData.content;
+            generateCalendarGrid();
+        }
+
+        function saveCalendarEvent() {
+            if(!selectedDateStr) {
+                alert("カレンダーの日付を選択してください。");
+                return;
+            }
+            const title = document.getElementById('cal-title').value.trim();
+            if(!title) {
+                alert("タイトルを入力してください。");
+                return;
+            }
+
+            calendarEvents[selectedDateStr] = {
+                subject: document.getElementById('cal-subject').value,
+                title: title,
+                desc: document.getElementById('cal-desc').value.trim(),
+                important: document.getElementById('cal-important').checked
+            };
+
+            selectCalendarDate(selectedDateStr);
             render();
+        }
+
+        function deleteSelectedEvent() {
+            if(selectedDateStr && calendarEvents[selectedDateStr]) {
+                delete calendarEvents[selectedDateStr];
+                selectCalendarDate(selectedDateStr);
+                render();
+            }
         }
 
         // 天気・気象庁データ
@@ -561,7 +620,7 @@
                 const tName = t.typhoonName ? `台風${t.typhoonName.number}号 (${t.typhoonName.nameKana})` : '熱帯低気圧';
                 let desc = `中心気圧: ${t.center?.pressure || '--'}hPa\n`;
                 if (t.wind?.average) desc += `最大風速: ${t.wind.average}m/s\n`;
-                desc += `※今後の気象情報に注意してください。`;
+                desc += `※現在の気象状況に注意してください。`;
 
                 document.getElementById('in-typhoon-title').value = tName;
                 document.getElementById('in-typhoon-desc').value = desc;
@@ -569,17 +628,18 @@
             } catch(e) { alert('台風データの取得に失敗しました。'); }
         }
 
-        // セクション管理
+        // 時間割管理入力
         function updateTimetableInputs() {
             const count = parseInt(document.getElementById('in-total-periods').value) || 6;
             const container = document.getElementById('timetable-inputs-container');
             container.innerHTML = '';
             for(let i=0; i<count; i++) {
-                container.innerHTML += `<div class="flex items-center gap-2"><span class="text-[10px] font-bold text-zinc-600 w-4">${i+1}</span><input type="text" class="matte-input flex-1 p-3 rounded-xl font-bold text-sm" value="${periods[i] || ''}" oninput="periods[${i}]=this.value; render();"></div>`;
+                container.innerHTML += `<div class="flex items-center gap-2"><span class="text-[10px] font-bold text-slate-600 w-4">${i+1}</span><input type="text" class="matte-input flex-1 p-3 rounded-xl font-bold text-sm" value="${periods[i] || ''}" oninput="periods[${i}]=this.value; render();"></div>`;
             }
             render();
         }
 
+        // カスタム掲示項目管理
         function addSection() {
             sections.push({ id: Date.now(), title: '新しい項目', icon: 'megaphone', content: '', width: 'half' });
             updateSectionInputs();
@@ -595,10 +655,10 @@
         function updateSectionInputs() {
             const container = document.getElementById('dynamic-sections');
             container.innerHTML = sections.map(s => `
-                <div class="bg-[#111] p-5 rounded-3xl border border-[#1a1a1a] space-y-3 relative group" data-id="${s.id}">
-                    <button onclick="removeSection(${s.id})" class="absolute top-4 right-4 text-zinc-600 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                <div class="bg-[#151515] p-5 rounded-3xl border border-[#1f1f1f] space-y-3 relative group" data-id="${s.id}">
+                    <button onclick="removeSection(${s.id})" class="absolute top-4 right-4 text-slate-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     <div class="flex gap-2 items-center">
-                        <div class="drag-handle p-2 -ml-2 text-zinc-600 hover:text-white transition-colors cursor-grab"><i data-lucide="grip-vertical" class="w-5 h-5"></i></div>
+                        <div class="drag-handle p-2 -ml-2 text-slate-600 hover:text-white transition-colors cursor-grab"><i data-lucide="grip-vertical" class="w-5 h-5"></i></div>
                         <select class="matte-input p-2 rounded-xl text-xs font-bold w-24" onchange="handleIconChange(${s.id}, this.value)">
                             ${Object.keys(subjectPresets).map(k => `<option value="${k}" ${s.icon===k?'selected':''}>${iconLabels[k]}</option>`).join('')}
                         </select>
@@ -648,7 +708,7 @@
                 .replace(/["”](.+?)["”]/g, '<strong>$1</strong>');
         }
 
-        // メインレンダリング
+        // キャンバスレンダリング処理
         function render() {
             const getV = (id) => document.getElementById(id).value;
             const getC = (id) => document.getElementById(id).checked;
@@ -664,7 +724,7 @@
             const minV = getV('in-period-min');
             document.getElementById('out-period-min').innerText = isNaN(minV) ? `${minV}` : `${minV}分授業`;
             
-            // 緊急連絡テロップ
+            // テロップ
             const marqueeText = getV('in-marquee');
             const warnArea = document.getElementById('out-warn-area');
             if(marqueeText.trim() !== "") {
@@ -698,77 +758,78 @@
                 document.getElementById('out-typhoon-desc').innerText = getV('in-typhoon-desc');
             } else { typhoonArea.classList.add('hidden'); }
 
-            // 時間割出力
+            // 時間割
             const count = parseInt(getV('in-total-periods'));
             document.getElementById('out-timetable').innerHTML = Array.from({length:count}).map((_, i) => `
-                <div class="border-[3px] border-slate-900 rounded-2xl p-4 text-center bg-transparent">
-                    <p class="text-[11px] font-bold text-slate-400 mb-1 uppercase tracking-widest font-mono">${i+1}</p>
-                    <p class="text-3xl font-black leading-none tracking-tighter">${periods[i] || '-'}</p>
+                <div class="border-[3px] border-slate-900 rounded-3xl p-5 text-center bg-white shadow-sm">
+                    <p class="text-[11px] font-bold text-slate-300 mb-1 uppercase tracking-widest font-mono">${i+1}</p>
+                    <p class="text-4xl font-bold leading-none tracking-tighter text-slate-900">${periods[i] || '-'}</p>
                 </div>`).join('');
 
-            // 【新機能】 カレンダータイムラインバーの描画
+            // 📕 【アップデート】「今後の予定ライン」本のデザイン（Book Style）描画
             const timelineBar = document.getElementById('out-timeline-bar');
-            if(calendarEvents.length === 0) {
-                timelineBar.innerHTML = `<div class="text-sm font-bold text-slate-400 italic py-2">直近の予定はありません</div>`;
+            const sortedDates = Object.keys(calendarEvents).sort((a,b) => new Date(a) - new Date(b));
+            
+            if(sortedDates.length === 0) {
+                timelineBar.innerHTML = `<div class="text-lg font-bold text-slate-300 italic py-4">登録された直近の予定はありません</div>`;
             } else {
-                timelineBar.innerHTML = calendarEvents.map(e => {
-                    const c = subjectColors[e.subject] || subjectColors['その他'];
-                    const borderStyle = e.important ? 'border-2 border-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.2)]' : 'border border-slate-200';
+                timelineBar.innerHTML = sortedDates.map(dateKey => {
+                    const e = calendarEvents[dateKey];
+                    const style = subjectStyles[e.subject] || subjectStyles['その他'];
+                    
+                    // しおりリボンの生成条件
+                    const bookmarkHTML = e.important ? `<div class="bookmark-ribbon"></div>` : '';
+                    
                     return `
-                        <div class="flex-shrink-0 min-w-[200px] max-w-[240px] p-4 rounded-2xl ${c.bg} ${borderStyle} text-left">
-                            <div class="flex justify-between items-baseline mb-1">
-                                <span class="text-[11px] font-black font-mono opacity-60">${e.date.substring(5).replace('-','/')}</span>
-                                <span class="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/80 shadow-sm border border-black/5 text-black subject-tag">${e.subject}</span>
+                        <div class="book-container flex-shrink-0 w-[240px] p-5 border-l-[14px] text-left" style="border-color: ${style.spine}; background-color: ${style.bg}">
+                            ${bookmarkHTML}
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-xs font-bold font-mono tracking-tight opacity-50">${dateKey.substring(5).replace('-','/')}</span>
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-900 text-white shadow-sm font-mono subject-label">${e.subject}</span>
                             </div>
-                            <h4 class="text-sm font-black truncate">${e.title}</h4>
-                            <p class="text-[11px] font-bold opacity-70 truncate mt-0.5">${e.desc || '詳細なし'}</p>
+                            <h4 class="text-lg font-bold truncate pr-6 text-slate-900" style="color: inherit;">${e.title}</h4>
+                            <p class="text-xs font-medium opacity-60 line-clamp-2 mt-1 leading-tight">${e.desc || '詳細なし'}</p>
                         </div>
                     `;
                 }).join('');
             }
 
-            // 【新機能】 前日自動連動タスクの計算と掲示項目描画
+            // 前日自動連携ロジック & 通常セクション描画
             const fontSize = getV('in-font-size') || 32;
             const gridContainer = document.getElementById('out-sections-grid');
-            gridContainer.innerHTML = '';
-
-            // 明日の日付文字列を生成 (YYYY-MM-DD)
+            
             const tomorrow = new Date();
             tomorrow.setDate(tomorrow.getDate() + 1);
             const tomorrowStr = tomorrow.toISOString().split('T')[0];
+            const tomorrowEvent = calendarEvents[tomorrowStr];
 
-            // 明日の予定をフィルタリングしてトップに固定
-            const tomorrowEvents = calendarEvents.filter(e => e.date === tomorrowStr);
             let tomorrowHTML = '';
-            if(tomorrowEvents.length > 0) {
-                tomorrowHTML = tomorrowEvents.map(e => {
-                    const c = subjectColors[e.subject] || subjectColors['その他'];
-                    const borderCls = e.important ? 'border-4 border-rose-500 shadow-md' : 'border-[3px] border-amber-500';
-                    return `
-                        <section class="col-span-2 bg-amber-500/5 p-6 rounded-3xl ${borderCls} border-dashed">
-                            <h3 class="text-[13px] font-black uppercase tracking-[0.3em] mb-4 text-amber-600 flex items-center gap-3 italic">
-                                <span class="p-2 bg-amber-500 text-white rounded-xl shadow-sm"><i data-lucide="calendar-clock" class="w-4 h-4 text-white"></i></span> 
-                                【明日の予定自動連携】 (${e.subject}) — ${e.title}
-                            </h3>
-                            <div class="font-bold tracking-tight leading-[1.3]" style="font-size: ${fontSize}px;">
-                                ${formatText(e.desc) || "明日のタスク・詳細を確認してください。"}
-                            </div>
-                        </section>
-                    `;
-                }).join('');
+            if(tomorrowEvent) {
+                const style = subjectStyles[tomorrowEvent.subject] || subjectStyles['その他'];
+                const borderCls = tomorrowEvent.important ? 'border-4 border-red-500 shadow-md' : 'border-[3px] border-blue-500';
+                tomorrowHTML = `
+                    <section class="col-span-2 bg-slate-50 p-8 rounded-3xl ${borderCls} border-dashed">
+                        <h3 class="text-[14px] font-bold uppercase tracking-[0.3em] mb-4 text-slate-900 flex items-center gap-3 italic">
+                            <span class="p-2 bg-black text-white rounded-xl shadow-sm"><i data-lucide="calendar-clock" class="w-4 h-4 text-white"></i></span> 
+                            【明日の予定自動連携】 (${tomorrowEvent.subject}) — ${tomorrowEvent.title}
+                        </h3>
+                        <div class="font-bold tracking-tight leading-[1.3]" style="font-size: ${fontSize}px;">
+                            ${formatText(tomorrowEvent.desc) || "明日の詳細や持ち物を確認してください。"}
+                        </div>
+                    </section>
+                `;
             }
 
-            // 通常セクションの描画
             const normalHTML = sections.map(s => `
-                <section class="${s.width === 'full' ? 'col-span-2' : ''} bg-transparent">
-                    <h3 class="text-[13px] font-bold uppercase tracking-[0.4em] mb-6 text-slate-400 flex items-center gap-3 italic border-b border-dashed border-slate-200 pb-2">
-                        <span class="p-2 bg-white rounded-xl shadow-sm border border-slate-100"><i data-lucide="${s.icon}" class="w-4 h-4 text-black"></i></span> ${s.title}
+                <section class="${s.width === 'full' ? 'col-span-2' : ''}">
+                    <h3 class="text-[14px] font-light uppercase tracking-[0.4em] mb-8 text-slate-400 flex items-center gap-4 italic">
+                        <span class="p-2.5 bg-white rounded-xl shadow-sm border border-slate-100"><i data-lucide="${s.icon}" class="w-5 h-5 text-black"></i></span> ${s.title}
                     </h3>
-                    <div class="space-y-4">
+                    <div class="space-y-6">
                         ${s.content.split('\n').filter(t => t.trim()).map(l => {
                             if (l.startsWith('・')) {
                                 return `<div class="font-bold tracking-tight leading-[1.3] flex items-start" style="font-size: ${fontSize}px;">
-                                    <span class="mr-3 text-slate-300">・</span><span>${formatText(l.substring(1))}</span>
+                                    <span class="mr-4 text-slate-200">・</span><span>${formatText(l.substring(1))}</span>
                                 </div>`;
                             } else {
                                 return `<div class="font-bold tracking-tight leading-[1.3]" style="font-size: ${fontSize}px;">
@@ -781,53 +842,31 @@
 
             gridContainer.innerHTML = tomorrowHTML + normalHTML;
 
-            // 【新機能】 学習Tips（付箋）
-            const tipsArea = document.getElementById('out-tips-area');
-            const tipsTitleInput = getV('in-tips-title').trim();
-            const tipsContentInput = getV('in-tips-content').trim();
-            
-            if(tipsTitleInput || tipsContentInput) {
-                tipsArea.classList.remove('hidden');
-                tipsArea.classList.add('flex');
-                document.getElementById('out-tips-title').innerText = tipsTitleInput || '💡 Learning Tips';
-                document.getElementById('out-tips-content').innerText = tipsContentInput;
-            } else {
-                tipsArea.classList.add('hidden');
-            }
-
             // リアルタイム時計
             document.getElementById('out-time').innerText = new Date().toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit'});
-            
-            tipsData.title = tipsTitleInput;
-            tipsData.content = tipsContentInput;
             
             lucide.createIcons();
             saveToLocal();
         }
 
-        // 初期設定
-        const d = new Date();
-        document.getElementById('out-date').innerText = `${d.getMonth()+1}/${d.getDate()} (${['日','月','火','水','木','金','土'][d.getDay()]})`;
-        
+        // 初期設定・呼び出し
         loadFromLocal();
-        updateCalendarControlList();
+        generateCalendarGrid();
         updateTimetableInputs();
         updateSectionInputs();
 
-        // 高解像度画像エクスポート (pixelRatio: 3)
+        // 画像書き出しエンジン
         async function exportImage() {
             const node = document.getElementById('board-canvas');
             const now = new Date();
-            const fileName = `BoardOS_v5_${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}.png`;
+            const fileName = `令和${now.getFullYear()-2018}年-${now.getMonth()+1}月-${now.getDate()}日_掲示板.png`;
             try {
-                const dataUrl = await htmlToImage.toPng(node, { pixelRatio: 3, skipWorkarounds: true });
+                const dataUrl = await htmlToImage.toPng(node, { pixelRatio: 3 });
                 const link = document.createElement('a');
                 link.download = fileName;
                 link.href = dataUrl;
                 link.click();
-            } catch (error) {
-                alert("画像の保存中にエラーが発生しました。");
-            }
+            } catch (e) { alert('画像の保存に失敗しました。'); }
         }
     </script>
 </body>
